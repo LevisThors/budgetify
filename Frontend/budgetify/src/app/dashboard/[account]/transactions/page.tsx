@@ -1,4 +1,10 @@
+import Card from "@/components/partials/Card";
+import { TransactionType } from "@/type/TransactionType";
 import { cookies } from "next/headers";
+import ActionButton from "@/components/partials/ActionButton";
+import { SheetTrigger, Sheet, SheetContent } from "@/components/ui/sheet";
+import AccountForm from "@/components/AccountForm";
+import { Suspense } from "react";
 
 interface TransactionsPageProps {
     params: {
@@ -29,8 +35,24 @@ export default async function TransactionsPage({
     const transactionsData = await getTransactions(params?.account);
 
     return (
-        <section>
-            <h1>Transactions</h1>
+        <section className="flex w-full justify-between">
+            <div className="w-2/3 px-16">
+                {transactionsData.map((transaction: TransactionType) => (
+                    <Card key={transaction.id} transaction={transaction} />
+                ))}
+            </div>
+            <div className="w-1/3">
+                {/* <Suspense fallback="">
+                    <Sheet>
+                        <SheetTrigger>
+                            <ActionButton />
+                        </SheetTrigger>
+                        <SheetContent>
+                            <AccountForm type="create" />
+                        </SheetContent>
+                    </Sheet>
+                </Suspense> */}
+            </div>
         </section>
     );
 }

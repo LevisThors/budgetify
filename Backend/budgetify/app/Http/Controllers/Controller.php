@@ -21,9 +21,4 @@ abstract class Controller extends BaseController
             return $this->getModel()::where("user_id", auth()->id())->get();
         }
     }
-
-    public function store()
-    {
-        return $this->getModel()::create(request()->all());
-    }
 }

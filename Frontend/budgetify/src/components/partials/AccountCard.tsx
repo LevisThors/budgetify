@@ -23,7 +23,7 @@ export default function AccountCard({
         >
             <div className="z-10 flex flex-col gap-7 h-full justify-center text-white">
                 <span className="text-3xl text-start">{account.title}</span>
-                <span className="text-5xl">{account.balance}</span>
+                <span className="text-5xl text-start">{account.balance}</span>
             </div>
             <div className="z-10 bg-white w-[90px] h-[90px] rounded-full flex justify-center items-center overflow-hidden">
                 <span className="text-6xl text-cutout bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500">
