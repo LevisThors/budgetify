@@ -8,25 +8,22 @@ export default function Logout() {
 
     const handleLogout = async () => {
         try {
-            // Get CSRF token
-            await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/sanctum/csrf-cookie`,
-                {
-                    method: "GET",
-                    credentials: "include",
-                }
-            );
+            await fetch(`/backend/sanctum/csrf-cookie`, {
+                method: "GET",
+                credentials: "include",
+                headers: {
+                    "ngrok-skip-browser-warning": "69420",
+                },
+            });
 
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/logout`,
-                {
-                    method: "POST",
-                    headers: {
-                        "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
-                    },
-                    credentials: "include",
-                }
-            );
+            const res = await fetch(`/backend/api/logout`, {
+                method: "POST",
+                headers: {
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                    "ngrok-skip-browser-warning": "69420",
+                },
+                credentials: "include",
+            });
 
             if (res.status === 200) {
                 router.push("/auth/login");

@@ -19,16 +19,14 @@ export default function SideBar() {
     };
 
     useEffect(() => {
-        const res = fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/accounts`,
-            {
-                headers: {
-                    Cookie: `laravel_session=${getCookie("laravel_session")}`,
-                    "ngrok-skip-browser-warning": "69420",
-                },
-                credentials: "include",
-            }
-        )
+        const res = fetch(`/backend/api/accounts`, {
+            headers: {
+                Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                "ngrok-skip-browser-warning": "69420",
+                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+            },
+            credentials: "include",
+        })
             .then((res) => res.json())
             .then((data) => {
                 if (localStorage.getItem("activeAccount") === null) {
