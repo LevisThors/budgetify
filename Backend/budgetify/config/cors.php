@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['budgetify-34qwodn1g-levisthors-projects.vercel.app'],
 
     'allowed_origins_patterns' => [],
 
