@@ -19,7 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 8, 2);
             $table->date('payment_date');
             $table->string('payee');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('account_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

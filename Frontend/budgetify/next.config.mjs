@@ -4,7 +4,7 @@ const nextConfig = {
         return [
             {
                 source: "/backend/:path*",
-                destination: "http://localhost:8000/:path*",
+                destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/:path*`,
             },
         ];
     },

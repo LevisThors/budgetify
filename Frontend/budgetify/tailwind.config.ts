@@ -12,8 +12,23 @@ const config: Config = {
                 authBlack: "#474747",
                 buttonTeal: "#B9E2E6",
             },
+            backgroundImage: {
+                "gradient-linear":
+                    "linear-gradient(to bottom right, #FEC9C7, #FAAEB7, #E487DE, #A498E4, #5DB2ED);",
+            },
         },
     },
-    plugins: [],
+    plugins: [
+        function ({ addUtilities }: any) {
+            const newUtilities = {
+                ".text-cutout": {
+                    "background-clip": "text",
+                    "-webkit-background-clip": "text",
+                    color: "transparent",
+                },
+            };
+            addUtilities(newUtilities);
+        },
+    ],
 };
 export default config;

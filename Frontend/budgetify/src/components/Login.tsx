@@ -64,7 +64,7 @@ export default function Login() {
         });
 
         if (response.status === 200) {
-            router.push("/transactions");
+            router.push("/dashboard/account/transactions");
         } else if (response.status === 401) {
             setValidationError("Invalid email or password");
         }

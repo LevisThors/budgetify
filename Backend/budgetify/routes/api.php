@@ -28,18 +28,18 @@ Route::post('/logout', [UserController::class, 'logout'])->middleware('web');
 
 // User Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [UserController::class, 'get']);
+    Route::get('/user', [UserController::class, 'get'])->middleware('web');
 
     Route::get('/categories', [CategoryController::class, 'getAll']);
     Route::post('/categories', [CategoryController::class, 'store']);
 
-    Route::get('/transactions', [TransactionController::class, 'getAll']);
+    Route::get('/transactions', [TransactionController::class, 'getAll'])->middleware('web');
     Route::post('/transactions', [TransactionController::class, 'store']);
 
     Route::get('/subscription', [SubscriptionController::class, 'getAll']);
     Route::post('/subscription', [SubscriptionController::class, 'store']);
 
-    Route::get('/accounts', [AccountController::class, 'getAll']);
+    Route::get('/accounts', [AccountController::class, 'getAll'])->middleware('web');
     Route::post('/accounts', [AccountController::class, 'store']);
 
     Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
