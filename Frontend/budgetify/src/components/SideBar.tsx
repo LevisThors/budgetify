@@ -24,6 +24,7 @@ export default function SideBar() {
             {
                 headers: {
                     Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                    "ngrok-skip-browser-warning": "69420",
                 },
                 credentials: "include",
             }

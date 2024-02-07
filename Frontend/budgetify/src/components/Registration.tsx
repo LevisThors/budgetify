@@ -59,6 +59,7 @@ export default function Login() {
                 accept: "application/json",
                 "Content-Type": "application/json",
                 "x-xsrf-token": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
             },
             body: JSON.stringify({
                 first_name: loginData.firstName,
