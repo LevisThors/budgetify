@@ -11,16 +11,12 @@ export default function Logout() {
             await fetch(`/backend/sanctum/csrf-cookie`, {
                 method: "GET",
                 credentials: "include",
-                headers: {
-                    "ngrok-skip-browser-warning": "69420",
-                },
             });
 
             const res = await fetch(`/backend/api/logout`, {
                 method: "POST",
                 headers: {
                     "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
-                    "ngrok-skip-browser-warning": "69420",
                 },
                 credentials: "include",
             });

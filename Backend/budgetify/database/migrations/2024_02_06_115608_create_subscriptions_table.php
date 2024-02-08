@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->decimal('amount', 8, 2);
             $table->date('payment_date');
             $table->foreignId('account_id')->constrained()->onDelete('cascade');

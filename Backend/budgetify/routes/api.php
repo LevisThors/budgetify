@@ -40,7 +40,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/subscription', [SubscriptionController::class, 'store']);
 
     Route::get('/accounts', [AccountController::class, 'getAll'])->middleware('web');
-    Route::post('/accounts', [AccountController::class, 'store']);
+    Route::put('/accounts/{id}', [AccountController::class, 'update'])->middleware('web');
+    Route::post('/accounts', [AccountController::class, 'store'])->middleware('web');
 
     Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
     Route::post('/piggy-banks', [PiggyBankController::class, 'store']);

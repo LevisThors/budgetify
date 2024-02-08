@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('obligatories', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('description');
-            $table->decimal('amount', 8, 2);
+            $table->text('description')->nullable();
+            $table->decimal('amount', 8, 2)->nullable();
             $table->date('payment_dates');
             $table->foreignId('account_id')->constrained()->onDelete('cascade');
 
