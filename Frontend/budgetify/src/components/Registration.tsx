@@ -49,6 +49,9 @@ export default function Login() {
         if (!isFormValid) return;
 
         await fetch("/backend/sanctum/csrf-cookie", {
+            headers: {
+                "ngrok-skip-browser-warning": "69420",
+            },
             credentials: "include",
         });
 
