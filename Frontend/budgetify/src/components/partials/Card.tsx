@@ -1,4 +1,6 @@
 import { TransactionType } from "@/type/TransactionType";
+import { Suspense } from "react";
+import Transaction from "../Transaction";
 
 export default function Card({
     transaction,
@@ -6,7 +8,7 @@ export default function Card({
     transaction: TransactionType;
 }) {
     return (
-        <div className="w-full h-[90px] bg-white rounded-lg p-4">
+        <div className="w-full h-[90px] bg-white rounded-lg p-4 relative">
             <div className="flex items-center h-full">
                 <div className="w-1/4 h-full bg-gray-300 rounded-lg font-bold flex justify-center items-center">
                     <span className="text-xl">
@@ -41,6 +43,9 @@ export default function Card({
                     </span>
                 </div>
             </div>
+            <Suspense>
+                <Transaction transaction={transaction} />
+            </Suspense>
         </div>
     );
 }

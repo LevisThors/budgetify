@@ -16,7 +16,7 @@ export default function AccountCard({
 }: AccountCardProps) {
     return (
         <li
-            className={`flex justify-between w-[400px] h-[185px] relative bg-gradient-linear rounded-xl p-5 cursor-pointer   ${
+            className={`flex justify-between w-[400px] h-[185px] relative bg-gradient-linear rounded-xl p-5 cursor-pointer ${
                 activeAccount == account.id ? "shadow-2xl" : "opacity-50"
             }`}
             onClick={() => handleClick(account.id)}
