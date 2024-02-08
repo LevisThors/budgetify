@@ -20,6 +20,7 @@ export async function getUserData() {
                     Cookie: `laravel_session=${
                         cookies().get("laravel_session")?.value
                     }`,
+                    "ngrok-skip-browser-warning": "69420",
                 },
                 credentials: "include",
             }

@@ -17,6 +17,7 @@ export default function Logout() {
                 method: "POST",
                 headers: {
                     "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                    "ngrok-skip-browser-warning": "69420",
                 },
                 credentials: "include",
             });

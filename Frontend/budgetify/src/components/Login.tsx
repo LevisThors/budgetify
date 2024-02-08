@@ -47,6 +47,9 @@ export default function Login() {
 
         await fetch("/backend/sanctum/csrf-cookie", {
             credentials: "include",
+            headers: {
+                "ngrok-skip-browser-warning": "69420",
+            },
         });
 
         const response = await fetch("/backend/api/login", {
@@ -56,6 +59,7 @@ export default function Login() {
                 accept: "application/json",
                 "Content-Type": "application/json",
                 "x-xsrf-token": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
             },
             body: JSON.stringify({
                 email: loginData.email,

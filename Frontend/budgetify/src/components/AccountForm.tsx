@@ -86,6 +86,7 @@ function AccountEditForm({ account }: { account: AccountType }) {
                 "Content-Type": "application/json",
                 Cookie: `laravel_session=${getCookie("laravel_session")}`,
                 "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
             },
             credentials: "include",
             body: JSON.stringify({
@@ -178,6 +179,7 @@ export function AccountCreateForm() {
                 "Content-Type": "application/json",
                 Cookie: `laravel_session=${getCookie("laravel_session")}`,
                 "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
             },
             credentials: "include",
             body: JSON.stringify({

@@ -12,6 +12,7 @@ const getAccounts = async () => {
                     cookies().get("laravel_session")?.value
                 }`,
                 "X-XSRF-TOKEN": cookies().get("XSRF-TOKEN")?.value || "",
+                "ngrok-skip-browser-warning": "69420",
             },
             credentials: "include",
         }

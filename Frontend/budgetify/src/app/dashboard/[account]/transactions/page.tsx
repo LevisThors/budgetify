@@ -28,6 +28,7 @@ async function getTransactions(accountId: string) {
                     cookies().get("laravel_session")?.value
                 }`,
                 Accept: "application/json",
+                "ngrok-skip-browser-warning": "69420",
             },
             credentials: "include",
         }
