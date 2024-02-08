@@ -9,4 +9,5 @@ export interface TransactionType {
     payment_date: Date;
     payee: string;
     categories: CategoryType[];
+    [key: string]: string | number | null | CategoryType[] | Date | undefined;
 }

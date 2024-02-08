@@ -11,6 +11,7 @@ const config: Config = {
             colors: {
                 authBlack: "#474747",
                 buttonTeal: "#B9E2E6",
+                toastGreen: "#1AA103",
             },
             backgroundImage: {
                 "gradient-linear":

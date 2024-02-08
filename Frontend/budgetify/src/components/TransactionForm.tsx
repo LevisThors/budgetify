@@ -59,17 +59,14 @@ function TransactionViewForm({
                         {transaction.payment_date.toString()}
                     </span>
                 </div>
-                {["Payee", "Description"].map((field) => (
-                    <div
-                        key={field}
-                        className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg"
-                    >
-                        <span className="w-1/3 font-bold">{field}</span>
-                        <span className="w-2/3">
-                            {transaction[field.toLowerCase()]}
-                        </span>
-                    </div>
-                ))}
+                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                    <span className="w-1/3 font-bold">Payee:</span>
+                    <span className="w-2/3">{transaction.payee}</span>
+                </div>
+                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                    <span className="w-1/3 font-bold">Description:</span>
+                    <span className="w-2/3">{transaction.description}</span>
+                </div>
             </div>
             <div>mediaItem</div>
         </div>

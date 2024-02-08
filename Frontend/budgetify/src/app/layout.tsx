@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
-import NavBar from "@/components/NavBar";
+import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 
@@ -18,7 +18,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={spaceGrotesk.className}>{children}</body>
+            <body className={spaceGrotesk.className}>
+                {children}
+                <Toaster />
+            </body>
         </html>
     );
 }

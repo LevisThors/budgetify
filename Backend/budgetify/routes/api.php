@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/accounts', [AccountController::class, 'getAll'])->middleware('web');
     Route::put('/accounts/{id}', [AccountController::class, 'update'])->middleware('web');
+    Route::delete('/accounts/{id}', [AccountController::class, 'delete'])->middleware('web');
     Route::post('/accounts', [AccountController::class, 'store'])->middleware('web');
 
     Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);

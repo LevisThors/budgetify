@@ -8,6 +8,7 @@ import { SheetClose, SheetFooter } from "./ui/sheet";
 import { getCookie } from "cookies-next";
 import revalidate from "@/util/revalidate";
 import Button from "./partials/Button";
+import { useToast } from "./ui/use-toast";
 
 interface AccountFormProps {
     type: "view" | "edit" | "create";
@@ -61,19 +62,21 @@ function AccountViewForm({ account }: { account: AccountType }) {
     );
 }
 
-function AccountEditForm({
-    account,
-    refetch,
-}: {
-    account: AccountType;
-    refetch?: () => void;
-}) {
+function AccountEditForm({ account }: { account: AccountType }) {
     const [formData, setFormData] = useState<AccountType>(account);
     const closeRef = useRef<HTMLButtonElement>(null);
+    const [error, setError] = useState<string>("");
+    const { toast } = useToast();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const isFormValid = () => {
+        return formData.title.trim() !== "" && formData.currency.trim() !== "";
     };
 
     const handleSubmit = () => {
@@ -93,7 +96,13 @@ function AccountEditForm({
         }).then((res) => {
             if (res.status === 200) {
                 revalidate(`/dashboard/${account.id}/transactions`);
+                toast({
+                    description: "Account has been updated successfully",
+                });
                 closeRef?.current?.click();
+            }
+            if (res.status === 400) {
+                setError("Account with such title already exists");
             }
         });
     };
@@ -101,17 +110,26 @@ function AccountEditForm({
     return (
         <div className="flex flex-col h-[95%] justify-between">
             <div className="flex flex-col gap-4">
-                <Input
-                    label="Title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required={true}
-                />
+                <div className="flex flex-col gap-1">
+                    {error && (
+                        <div className="w-full p-2 bg-red-500 bg-opacity-50 text-authBlack flex justify-between text-sm rounded-md">
+                            <span>{error}</span>
+                            <button onClick={() => setError("")}>X</button>
+                        </div>
+                    )}
+                    <Input
+                        label="Title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required={true}
+                    />
+                </div>
                 <Input
                     label="Currency"
                     name="currency"
                     type="select"
+                    options={["USD", "EUR"]}
                     value={formData.currency}
                     onChange={handleChange}
                     required={true}
@@ -128,6 +146,7 @@ function AccountEditForm({
                 <Button
                     onClick={handleSubmit}
                     text="Save"
+                    active={isFormValid()}
                     className="text-red px-5"
                 />
             </SheetFooter>
@@ -135,17 +154,25 @@ function AccountEditForm({
     );
 }
 
-export function AccountCreateForm({ refetch }: { refetch?: () => void }) {
+export function AccountCreateForm() {
     const [formData, setFormData] = useState<AccountType>(emptyAccount);
+    const [error, setError] = useState<string>("");
     const closeRef = useRef<HTMLButtonElement>(null);
+    const { toast } = useToast();
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = () => {
-        fetch(`/backend/api/accounts`, {
+    const isFormValid = () => {
+        return formData.title.trim() !== "" && formData.currency.trim() !== "";
+    };
+
+    const handleSubmit = async () => {
+        await fetch(`/backend/api/accounts`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -161,9 +188,14 @@ export function AccountCreateForm({ refetch }: { refetch?: () => void }) {
             }),
         }).then((res) => {
             if (res.status === 200) {
-                console.log(res.json());
                 revalidate();
                 closeRef?.current?.click();
+                toast({
+                    description: "Account has been created successfully",
+                });
+            }
+            if (res.status === 400) {
+                setError("Account with such title already exists");
             }
         });
     };
@@ -171,16 +203,26 @@ export function AccountCreateForm({ refetch }: { refetch?: () => void }) {
     return (
         <div className="flex flex-col h-[95%] justify-between">
             <div className="flex flex-col gap-4">
-                <Input
-                    label="Title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    required={true}
-                />
+                <div className="flex flex-col gap-1">
+                    {error && (
+                        <div className="w-full p-2 bg-red-500 bg-opacity-50 text-authBlack flex justify-between text-sm rounded-md">
+                            <span>{error}</span>
+                            <button onClick={() => setError("")}>X</button>
+                        </div>
+                    )}
+                    <Input
+                        label="Title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required={true}
+                        maxLength={128}
+                    />
+                </div>
                 <Input
                     label="Balance"
                     name="balance"
+                    type="number"
                     value={formData.balance.toString()}
                     onChange={handleChange}
                     required={true}
@@ -189,6 +231,8 @@ export function AccountCreateForm({ refetch }: { refetch?: () => void }) {
                     label="Currency"
                     name="currency"
                     type="select"
+                    options={["USD", "EUR"]}
+                    defaultOption="CNY"
                     value={formData.currency}
                     onChange={handleChange}
                     required={true}
@@ -206,6 +250,7 @@ export function AccountCreateForm({ refetch }: { refetch?: () => void }) {
                     onClick={handleSubmit}
                     text="Save"
                     className="text-red px-5"
+                    active={isFormValid()}
                 />
             </SheetFooter>
         </div>

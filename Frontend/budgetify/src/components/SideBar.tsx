@@ -26,7 +26,12 @@ export default async function SideBar() {
     return (
         <ul className="flex flex-col gap-7">
             {accountData.map((account: AccountType) => (
-                <Suspense key={account.id}>
+                <Suspense
+                    key={account.id}
+                    fallback={
+                        <div className="flex justify-between w-[400px] h-[185px] relative bg-gradient-linear rounded-xl p-5 cursor-pointer opacity-50"></div>
+                    }
+                >
                     <Account account={account} />
                 </Suspense>
             ))}

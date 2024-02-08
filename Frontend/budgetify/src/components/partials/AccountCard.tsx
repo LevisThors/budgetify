@@ -19,7 +19,7 @@ export default function AccountCard({
             className={`flex justify-between w-[400px] h-[185px] relative bg-gradient-linear rounded-xl p-5 cursor-pointer ${
                 activeAccount == account.id ? "shadow-2xl" : "opacity-50"
             }`}
-            onClick={() => handleClick(account.id)}
+            onClick={() => handleClick(account.id || "")}
         >
             <div className="z-10 flex flex-col gap-7 h-full justify-center text-white">
                 <span className="text-3xl text-start">{account.title}</span>

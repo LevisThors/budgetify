@@ -11,18 +11,47 @@ import AccountCard from "./partials/AccountCard";
 import Link from "next/link";
 import AccountForm from "./AccountForm";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { AccountType } from "@/type/AccountType";
+import { getCookie } from "cookies-next";
+import { useToast } from "./ui/use-toast";
+import revalidate from "@/util/revalidate";
 
 export default function Account({ account }: { account: AccountType }) {
     const [activeAccount, setActiveAccount] = useState<string | null>("");
     const [openAccountType, setOpenAccountType] = useState<string>("view");
+    const { toast } = useToast();
+    const closeRef = useRef<HTMLButtonElement>(null);
     const pathName = usePathname();
 
     const handleClick = (id: string | number) => {
         localStorage.setItem("activeAccount", id.toString());
         setActiveAccount(id.toString());
+    };
+
+    const handleDelete = (id: string | number) => {
+        localStorage.removeItem("activeAccount");
+        setActiveAccount("");
+
+        fetch(`/backend/api/accounts/${id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+            },
+            credentials: "include",
+        }).then((res) => {
+            if (res.status === 200) {
+                revalidate();
+                toast({
+                    description: "Account has been deleted",
+                    variant: "destructive",
+                });
+                closeRef?.current?.click();
+            }
+        });
     };
 
     useEffect(() => {
@@ -62,7 +91,11 @@ export default function Account({ account }: { account: AccountType }) {
                                                 height={36}
                                             />
                                         </button>
-                                        <button>
+                                        <button
+                                            onClick={() =>
+                                                handleDelete(account.id || "")
+                                            }
+                                        >
                                             <Image
                                                 src="/icons/delete.svg"
                                                 alt="delete account"
@@ -74,6 +107,7 @@ export default function Account({ account }: { account: AccountType }) {
                                 ) : null}
                                 <SheetClose
                                     onClick={() => setOpenAccountType("view")}
+                                    ref={closeRef}
                                 >
                                     <Image
                                         src="/icons/close.svg"

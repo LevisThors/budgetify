@@ -7,4 +7,5 @@ export interface AccountType {
     user_id?: string | number;
     created_at?: null;
     updated_at?: null;
+    [key: string]: string | number | null | undefined;
 }
