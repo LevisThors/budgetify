@@ -25,7 +25,7 @@ class UserController extends Controller
 
         $user = new User([
             'first_name' => $request->first_name,
-            'last_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
         ]);
@@ -67,6 +67,18 @@ class UserController extends Controller
 
     public function get(Request $request)
     {
-        return response()->json($request->user(), 200);
+        $user = Auth::user();
+
+        if ($user) {
+            return response()->json(
+                [
+                    "firstName" => $user->first_name,
+                    "lastName" => $user->last_name
+                ],
+                200
+            );
+        } else {
+            return response()->json(['message' => 'User not found'], 404);
+        }
     }
 }

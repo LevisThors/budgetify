@@ -21,4 +21,24 @@ class Account extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function obligatories()
+    {
+        return $this->hasMany(Obligatory::class);
+    }
+
+    public function piggyBanks()
+    {
+        return $this->hasMany(PiggyBank::class);
+    }
 }

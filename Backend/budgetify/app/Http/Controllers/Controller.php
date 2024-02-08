@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
 abstract class Controller extends BaseController
@@ -12,9 +13,13 @@ abstract class Controller extends BaseController
 
     abstract protected function getModel();
 
-    public function getAll()
+    public function getAll(Request $request)
     {
-        return $this->getModel()::where("user_id", auth()->id())->get();
+        if (isset($request->account_id)) {
+            return $this->getModel()::where("account_id", $request->account_id)->get();
+        } else {
+            return $this->getModel()::where("user_id", auth()->id())->get();
+        }
     }
 
     public function store()

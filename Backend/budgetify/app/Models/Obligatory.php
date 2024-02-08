@@ -17,8 +17,8 @@ class Obligatory extends Model
         'user_id',
     ];
 
-    public function user()
+    public function account()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Account::class);
     }
 }

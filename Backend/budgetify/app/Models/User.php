@@ -53,24 +53,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Category::class);
     }
-
-    public function transactions()
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function piggyBanks()
-    {
-        return $this->hasMany(PiggyBank::class);
-    }
-
-    public function obligatories()
-    {
-        return $this->hasMany(Obligatory::class);
-    }
 }
