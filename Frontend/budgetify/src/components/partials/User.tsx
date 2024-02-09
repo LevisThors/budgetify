@@ -10,21 +10,19 @@ import { cookies } from "next/headers";
 import Logout from "./Logout";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+import PATHS from "@/paths";
 
 export async function getUserData() {
     try {
-        const res = await fetch(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/user`,
-            {
-                headers: {
-                    Cookie: `laravel_session=${
-                        cookies().get("laravel_session")?.value
-                    }`,
-                    "ngrok-skip-browser-warning": "69420",
-                },
-                credentials: "include",
-            }
-        );
+        const res = await fetch(PATHS.API.BASE.USER.GET, {
+            headers: {
+                Cookie: `laravel_session=${
+                    cookies().get("laravel_session")?.value
+                }`,
+                "ngrok-skip-browser-warning": "69420",
+            },
+            credentials: "include",
+        });
 
         return res.json();
     } catch (error) {
@@ -37,9 +35,9 @@ export default async function User() {
 
     try {
         userData = await getUserData();
-        if (!userData.firstName) redirect("/auth/login");
+        if (!userData.firstName) redirect(PATHS.AUTH.LOGIN);
     } catch (error) {
-        redirect("/auth/login");
+        redirect(PATHS.AUTH.LOGIN);
     }
 
     return (

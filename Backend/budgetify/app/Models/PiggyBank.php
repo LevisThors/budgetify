@@ -14,7 +14,7 @@ class PiggyBank extends Model
         'goal_amount',
         'saved_amount',
         'date',
-        'user_id',
+        'account_id',
     ];
 
     public function account()

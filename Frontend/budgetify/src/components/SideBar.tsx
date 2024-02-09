@@ -2,21 +2,19 @@ import { AccountType } from "@/type/AccountType";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 import Account from "./Account";
+import PATHS from "@/paths";
 
 const getAccounts = async () => {
-    const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/accounts`,
-        {
-            headers: {
-                Cookie: `laravel_session=${
-                    cookies().get("laravel_session")?.value
-                }`,
-                "X-XSRF-TOKEN": cookies().get("XSRF-TOKEN")?.value || "",
-                "ngrok-skip-browser-warning": "69420",
-            },
-            credentials: "include",
-        }
-    );
+    const res = await fetch(PATHS.API.BASE.ACCOUNT.GET, {
+        headers: {
+            Cookie: `laravel_session=${
+                cookies().get("laravel_session")?.value
+            }`,
+            "X-XSRF-TOKEN": cookies().get("XSRF-TOKEN")?.value || "",
+            "ngrok-skip-browser-warning": "69420",
+        },
+        credentials: "include",
+    });
 
     return res.json();
 };

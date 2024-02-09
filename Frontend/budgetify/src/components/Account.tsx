@@ -17,6 +17,7 @@ import { AccountType } from "@/type/AccountType";
 import { getCookie } from "cookies-next";
 import { useToast } from "./ui/use-toast";
 import revalidate from "@/util/revalidate";
+import PATHS from "@/paths";
 
 export default function Account({ account }: { account: AccountType }) {
     const [activeAccount, setActiveAccount] = useState<string | null>("");
@@ -34,7 +35,7 @@ export default function Account({ account }: { account: AccountType }) {
         localStorage.removeItem("activeAccount");
         setActiveAccount("");
 
-        fetch(`/backend/api/accounts/${id}`, {
+        fetch(PATHS.API.PROXY.ACCOUNT.DELETE(id), {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",

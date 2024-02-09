@@ -9,6 +9,7 @@ import { getCookie } from "cookies-next";
 import revalidate from "@/util/revalidate";
 import Button from "./partials/Button";
 import { useToast } from "./ui/use-toast";
+import PATHS from "@/paths";
 
 interface AccountFormProps {
     type: "view" | "edit" | "create";
@@ -80,7 +81,7 @@ function AccountEditForm({ account }: { account: AccountType }) {
     };
 
     const handleSubmit = () => {
-        fetch(`/backend/api/accounts/${account.id}`, {
+        fetch(PATHS.API.PROXY.ACCOUNT.PUT(account.id || ""), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -173,7 +174,7 @@ export function AccountCreateForm() {
     };
 
     const handleSubmit = async () => {
-        await fetch(`/backend/api/accounts`, {
+        await fetch(PATHS.API.PROXY.ACCOUNT.GET, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

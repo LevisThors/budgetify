@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
+import revalidate from "@/util/revalidate";
+import PATHS from "@/paths";
 
 const loginFields = {
     email: "",
@@ -45,14 +47,14 @@ export default function Login() {
 
         if (!isFormValid) return;
 
-        await fetch("/backend/sanctum/csrf-cookie", {
+        await fetch(PATHS.API.PROXY.AUTH.GET_CSRF, {
             credentials: "include",
             headers: {
                 "ngrok-skip-browser-warning": "69420",
             },
         });
 
-        const response = await fetch("/backend/api/login", {
+        const response = await fetch(PATHS.API.PROXY.AUTH.LOGIN, {
             credentials: "include",
             method: "POST",
             headers: {
@@ -68,7 +70,10 @@ export default function Login() {
         });
 
         if (response.status === 200) {
-            router.push("/dashboard/account/transactions");
+            revalidate();
+            router.push(
+                PATHS.PAGES(localStorage.getItem("activeAccount") || "").HOME
+            );
         } else if (response.status === 401) {
             setValidationError("Invalid email or password");
         }
@@ -107,13 +112,16 @@ export default function Login() {
                         error={errors.password}
                         handleChange={handleChange}
                     />
-                    <Link href="/auth/register" className="text-sm underline">
+                    <Link
+                        href={PATHS.AUTH.REGISTER}
+                        className="text-sm underline"
+                    >
                         Create account
                     </Link>
                 </div>
                 <Button
                     text="Login"
-                    active={isFormValid ? true : false}
+                    active={!!isFormValid}
                     onClick={handleSubmit}
                 />
             </div>

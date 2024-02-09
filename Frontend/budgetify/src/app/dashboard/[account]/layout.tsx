@@ -8,7 +8,7 @@ export default function DashboardLayout({
 }>) {
     return (
         <section className="flex">
-            <aside>
+            <aside className="min-w-[400px]">
                 <Suspense>
                     <SideBar />
                 </Suspense>

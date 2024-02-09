@@ -1,4 +1,5 @@
 import { getUserData } from "@/components/partials/User";
+import PATHS from "@/paths";
 import { redirect } from "next/navigation";
 
 export default async function Home() {
@@ -6,11 +7,11 @@ export default async function Home() {
         const userData = await getUserData();
 
         if (userData.firstName) {
-            redirect("/dashboard/account/transactions");
+            redirect(PATHS.PAGES().HOME);
         } else {
-            redirect("/auth/login");
+            redirect(PATHS.AUTH.LOGIN);
         }
     } catch (error) {
-        redirect("/auth/login");
+        redirect(PATHS.AUTH.LOGIN);
     }
 }

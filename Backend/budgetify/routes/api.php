@@ -21,32 +21,34 @@ use App\Http\Controllers\UserController;
 */
 
 
-// Guest Routes
-Route::post('/register', [UserController::class, 'register'])->middleware('web');
-Route::post('/login', [UserController::class, 'login'])->middleware('web');
-Route::post('/logout', [UserController::class, 'logout'])->middleware('web');
+Route::middleware("web")->group(function () {
+    // Guest Routes
+    Route::post('/register', [UserController::class, 'register']);
+    Route::post('/login', [UserController::class, 'login']);
+    Route::post('/logout', [UserController::class, 'logout']);
 
-// User Routes
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/user', [UserController::class, 'get'])->middleware('web');
+    // User Routes
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::get('/user', [UserController::class, 'get']);
 
-    Route::get('/categories', [CategoryController::class, 'getAll']);
-    Route::post('/categories', [CategoryController::class, 'store']);
+        Route::get('/categories', [CategoryController::class, 'getAll']);
+        Route::post('/categories', [CategoryController::class, 'store']);
 
-    Route::get('/transactions', [TransactionController::class, 'getAll'])->middleware('web');
-    Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions', [TransactionController::class, 'getAll']);
+        Route::post('/transactions', [TransactionController::class, 'store']);
 
-    Route::get('/subscription', [SubscriptionController::class, 'getAll']);
-    Route::post('/subscription', [SubscriptionController::class, 'store']);
+        Route::get('/subscription', [SubscriptionController::class, 'getAll']);
+        Route::post('/subscription', [SubscriptionController::class, 'store']);
 
-    Route::get('/accounts', [AccountController::class, 'getAll'])->middleware('web');
-    Route::put('/accounts/{id}', [AccountController::class, 'update'])->middleware('web');
-    Route::delete('/accounts/{id}', [AccountController::class, 'delete'])->middleware('web');
-    Route::post('/accounts', [AccountController::class, 'store'])->middleware('web');
+        Route::get('/accounts', [AccountController::class, 'getAll']);
+        Route::put('/accounts/{id}', [AccountController::class, 'update']);
+        Route::delete('/accounts/{id}', [AccountController::class, 'delete']);
+        Route::post('/accounts', [AccountController::class, 'store']);
 
-    Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
-    Route::post('/piggy-banks', [PiggyBankController::class, 'store']);
+        Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
+        Route::post('/piggy-banks', [PiggyBankController::class, 'store']);
 
-    Route::get('/obligatories', [ObligatoryController::class, 'getAll']);
-    Route::post('/obligatories', [ObligatoryController::class, 'store']);
+        Route::get('/obligatories', [ObligatoryController::class, 'getAll']);
+        Route::post('/obligatories', [ObligatoryController::class, 'store']);
+    });
 });

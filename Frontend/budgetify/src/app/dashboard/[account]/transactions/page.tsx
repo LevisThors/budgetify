@@ -12,16 +12,30 @@ import {
 import Image from "next/image";
 import AccountForm from "@/components/AccountForm";
 import { Suspense } from "react";
+import TransactionForm from "@/components/TransactionForm";
+import PATHS from "@/paths";
+import PiggyBank from "@/components/PiggyBank";
+import FilterButton from "@/components/partials/FilterButton";
+import SearchBar from "@/components/partials/SearchBar";
 
 interface TransactionsPageProps {
     params: {
         account: string;
     };
+    searchParams?: {
+        query?: string;
+        type?: string;
+    };
 }
 
-async function getTransactions(accountId: string) {
+export async function getTransactions(
+    accountId: string,
+    searchParams: { query?: string; type?: string } | null
+) {
     const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions?account_id=${accountId}`,
+        `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
+            searchParams?.query ? `&query=${searchParams.query}` : ""
+        }${searchParams?.type ? `&type=${searchParams.type}` : ""}`,
         {
             headers: {
                 Cookie: `laravel_session=${
@@ -39,18 +53,31 @@ async function getTransactions(accountId: string) {
 
 export default async function TransactionsPage({
     params,
+    searchParams,
 }: TransactionsPageProps) {
-    const transactionsData = await getTransactions(params?.account);
+    const transactionsData = await getTransactions(
+        params?.account,
+        searchParams || null
+    );
 
     return (
         <section className="flex w-full justify-between h-full">
-            <div className="w-2/3 px-16">
-                {transactionsData.map((transaction: TransactionType) => (
-                    <Card key={transaction.id} transaction={transaction} />
-                ))}
+            <div className="w-2/3 px-16 flex flex-col gap-5">
+                <Suspense>
+                    <SearchBar />
+                </Suspense>
+                {/* <SortBy /> */}
+                {transactionsData?.message !== "Empty account" &&
+                    transactionsData.map((transaction: TransactionType) => (
+                        <Card key={transaction.id} transaction={transaction} />
+                    ))}
             </div>
             <div className="w-1/3 h-full flex flex-col justify-between">
                 <div className="flex flex-col gap-4">
+                    <Suspense>
+                        <FilterButton type="Income" />
+                        <FilterButton type="Expenses" />
+                    </Suspense>
                     <Suspense fallback="loading">
                         <Sheet>
                             <SheetTrigger>
@@ -75,7 +102,10 @@ export default async function TransactionsPage({
                         </Sheet>
                         <Sheet>
                             <SheetTrigger>
-                                <ActionButton text="Add Transaction" />
+                                <ActionButton
+                                    text="Add Transaction"
+                                    needsAccount={true}
+                                />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
@@ -93,13 +123,13 @@ export default async function TransactionsPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <AccountForm type="create" />
+                                <TransactionForm type="create" />
                             </SheetContent>
                         </Sheet>
                     </Suspense>
                 </div>
                 <div>
-                    <h1>Piggy Bank</h1>
+                    <PiggyBank />
                 </div>
             </div>
         </section>

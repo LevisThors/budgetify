@@ -10,9 +10,9 @@ export default function Card({
     return (
         <div className="w-full h-[90px] bg-white rounded-lg p-4 relative">
             <div className="flex items-center h-full">
-                <div className="w-1/4 h-full bg-gray-300 rounded-lg font-bold flex justify-center items-center">
+                <div className="w-1/4 h-full bg-gray-100 rounded-lg font-bold flex justify-center items-center">
                     <span className="text-xl">
-                        {transaction.categories[0].title}
+                        {transaction.categories[0]?.title}
                     </span>
                 </div>
                 <div className="w-2/4 h-full ps-3">
