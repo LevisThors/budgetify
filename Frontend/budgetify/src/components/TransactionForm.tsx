@@ -106,7 +106,216 @@ function TransactionEditForm({
 }: {
     transaction: TransactionType;
 }) {
-    return <div>Hello</div>;
+    const [formData, setFormData] = useState(transaction);
+    const [categories, setCategories] = useState<{
+        [key: string]: CategoryType[];
+    }>();
+    const [error, setError] = useState<string>("");
+    const closeRef = useRef<HTMLButtonElement>(null);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        fetch(PATHS.API.PROXY.CATEGORY.GET, {
+            headers: {
+                Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
+            },
+            credentials: "include",
+        })
+            .then((res) => res.json())
+            .then((data) => setCategories(data));
+    }, []);
+
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileUpload = (file: File | null) => {
+        setFormData((prev) => {
+            if (!file) return prev;
+            const newMedia = [...(prev.media ?? []), file];
+
+            return { ...prev, media: newMedia };
+        });
+    };
+
+    const handleFileDelete = (index: number) => {
+        setFormData((prev) => {
+            const newMedia = prev.media?.filter((_, i) => i !== index);
+            return { ...prev, media: newMedia };
+        });
+    };
+
+    const handleSelect = (id: string, action: "add" | "delete") => {
+        const category = categories?.[formData.type].find(
+            (category) => category.id == id
+        );
+
+        if (action === "add") {
+            setFormData((prev) => ({
+                ...prev,
+                categories: [...prev.categories, category as CategoryType],
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                categories: prev.categories.filter(
+                    (category) => category.id != id
+                ),
+            }));
+        }
+    };
+
+    const isFormValid = () => {
+        return (
+            formData.title.trim() !== "" &&
+            formData.amount !== null &&
+            formData.payment_date.toString() !== "" &&
+            formData.categories.length > 0
+        );
+    };
+
+    const handleSubmit = async () => {
+        if (isFormValid()) {
+            const data = new FormData();
+
+            Object.entries(formData).forEach(([key, value]) => {
+                if (key !== "media" && key !== "categories") {
+                    data.append(key, value.toString());
+                }
+            });
+
+            formData.categories.forEach((category) => {
+                data.append("categories[]", category?.id?.toString() || "");
+            });
+
+            formData.media?.forEach((file) => {
+                data.append("media[]", file);
+            });
+
+            data.append(
+                "account_id",
+                localStorage.getItem("activeAccount") || ""
+            );
+
+            await fetch(PATHS.API.PROXY.TRANSACTION.PUT(transaction.id || ""), {
+                method: "PUT",
+                headers: {
+                    Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                    "ngrok-skip-browser-warning": "69420",
+                },
+                credentials: "include",
+                body: data,
+            }).then((res) => {
+                if (res.status === 200) {
+                    revalidate();
+                    closeRef?.current?.click();
+                    toast({
+                        description:
+                            "Transaction has been updated successfully",
+                    });
+                }
+                if (res.status === 400) {
+                    setError("Insufficient Funds");
+                }
+            });
+        }
+    };
+
+    return (
+        <div className="flex flex-col h-[95%] justify-between">
+            <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                    {error && (
+                        <div className="w-full p-2 bg-red-500 bg-opacity-50 text-authBlack flex justify-between text-sm rounded-md">
+                            <span>{error}</span>
+                            <button onClick={() => setError("")}>X</button>
+                        </div>
+                    )}
+                    <div className="flex gap-2">
+                        {["Expenses", "Income"].map((type) => (
+                            <span
+                                key={type}
+                                className={`w-fit text-xl border border-authBlack p-2 rounded-lg cursor-pointer ${
+                                    formData.type !== type ? "opacity-50" : ""
+                                } `}
+                                onClick={() =>
+                                    setFormData({
+                                        ...formData,
+                                        type: type as "Income" | "Expenses",
+                                    })
+                                }
+                            >
+                                {type}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+                <Input
+                    label="Title"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    required={true}
+                    maxLength={128}
+                />
+                {categories && (
+                    <MultiSelect
+                        label="Categories"
+                        categories={categories[formData.type]}
+                        selected={formData.categories}
+                        onSelect={handleSelect}
+                        required={true}
+                    />
+                )}
+                <Input
+                    label="Amount"
+                    name="amount"
+                    value={formData.amount.toString()}
+                    onChange={handleChange}
+                    required={true}
+                />
+                <Input
+                    label="Payment Date"
+                    name="payment_date"
+                    type="date"
+                    value={formData.payment_date.toString()}
+                    onChange={handleChange}
+                    required={true}
+                />
+                <Input
+                    label="Payee"
+                    name="payee"
+                    value={formData.payee}
+                    onChange={handleChange}
+                />
+                <Input
+                    label="Description"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                />
+                <Dropzone
+                    onFileUpload={handleFileUpload}
+                    onDelete={handleFileDelete}
+                />
+            </div>
+            <SheetFooter className="flex gap-4">
+                <SheetClose ref={closeRef}>Cancel</SheetClose>
+                <Button
+                    onClick={handleSubmit}
+                    text="Save"
+                    className="text-red px-5"
+                    active={isFormValid()}
+                />
+            </SheetFooter>
+        </div>
+    );
 }
 
 function TransactionCreateForm() {

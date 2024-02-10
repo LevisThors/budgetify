@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Account;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,7 +42,13 @@ class TransactionController extends Controller
 
             $transactions = $query->get();
 
-            return response()->json($transactions, 200);
+            return response()->json(
+                [
+                    "transactions" => $transactions,
+                    "currency" => Account::find($request->account_id)->first()->currency
+                ],
+                200
+            );
         } else {
             return response()->json(['message' => 'Empty account'], 200);
         }

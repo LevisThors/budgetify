@@ -18,15 +18,25 @@ import { getCookie } from "cookies-next";
 import { useToast } from "./ui/use-toast";
 import revalidate from "@/util/revalidate";
 import PATHS from "@/paths";
+import {
+    DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogClose,
+    DialogHeader,
+} from "./ui/dialog";
+import Button from "./partials/Button";
 
 export default function Account({ account }: { account: AccountType }) {
     const [activeAccount, setActiveAccount] = useState<string | null>("");
     const [openAccountType, setOpenAccountType] = useState<string>("view");
     const { toast } = useToast();
     const closeRef = useRef<HTMLButtonElement>(null);
+    const popupRef = useRef<HTMLButtonElement>(null);
     const pathName = usePathname();
 
-    const handleClick = (id: string | number) => {
+    const handleClick = (id: string | number, currency: string) => {
         localStorage.setItem("activeAccount", id.toString());
         setActiveAccount(id.toString());
     };
@@ -93,18 +103,70 @@ export default function Account({ account }: { account: AccountType }) {
                                                 height={36}
                                             />
                                         </button>
-                                        <button
-                                            onClick={() =>
-                                                handleDelete(account.id || "")
-                                            }
-                                        >
-                                            <Image
-                                                src="/icons/delete.svg"
-                                                alt="delete account"
-                                                width={32}
-                                                height={32}
-                                            />
-                                        </button>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <button>
+                                                    <Image
+                                                        src="/icons/delete.svg"
+                                                        alt="delete account"
+                                                        width={32}
+                                                        height={32}
+                                                    />
+                                                </button>
+                                            </DialogTrigger>
+                                            <DialogContent className="sm:max-w-md">
+                                                <DialogHeader>
+                                                    <div className="flex justify-between">
+                                                        <span>
+                                                            Delete Transaction
+                                                        </span>
+                                                        <div>
+                                                            <Image
+                                                                src="/icons/close.svg"
+                                                                width={35}
+                                                                height={35}
+                                                                alt="close popup"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </DialogHeader>
+                                                <div className="flex items-center space-x-2">
+                                                    <p>
+                                                        Are you sure you want to
+                                                        delete transaction?
+                                                    </p>
+                                                </div>
+                                                <DialogFooter className="flex justify-end items-center">
+                                                    <DialogClose
+                                                        asChild
+                                                        ref={popupRef}
+                                                    >
+                                                        <span
+                                                            onClick={() =>
+                                                                handleDelete(
+                                                                    account.id ||
+                                                                        ""
+                                                                )
+                                                            }
+                                                        >
+                                                            Yes
+                                                        </span>
+                                                    </DialogClose>
+                                                    <DialogClose
+                                                        asChild
+                                                        ref={popupRef}
+                                                    >
+                                                        <Button
+                                                            text="No"
+                                                            onClick={() =>
+                                                                popupRef.current
+                                                                    ?.click
+                                                            }
+                                                        />
+                                                    </DialogClose>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
                                     </>
                                 ) : null}
                                 <SheetClose

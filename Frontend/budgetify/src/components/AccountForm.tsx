@@ -10,6 +10,17 @@ import revalidate from "@/util/revalidate";
 import Button from "./partials/Button";
 import { useToast } from "./ui/use-toast";
 import PATHS from "@/paths";
+import { useRouter } from "next/navigation";
+import {
+    DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogClose,
+    DialogHeader,
+} from "./ui/dialog";
+import Image from "next/image";
+import { skip } from "node:test";
 
 interface AccountFormProps {
     type: "view" | "edit" | "create";
@@ -64,8 +75,11 @@ function AccountViewForm({ account }: { account: AccountType }) {
 }
 
 function AccountEditForm({ account }: { account: AccountType }) {
+    const initialCurrency = account.currency;
     const [formData, setFormData] = useState<AccountType>(account);
     const closeRef = useRef<HTMLButtonElement>(null);
+    const openPopupRef = useRef<HTMLButtonElement>(null);
+    const closePopupRef = useRef<HTMLButtonElement>(null);
     const [error, setError] = useState<string>("");
     const { toast } = useToast();
 
@@ -76,12 +90,23 @@ function AccountEditForm({ account }: { account: AccountType }) {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const closeForm = () => {
+        closeRef.current?.click();
+    };
+
     const isFormValid = () => {
         return formData.title.trim() !== "" && formData.currency.trim() !== "";
     };
 
-    const handleSubmit = () => {
-        fetch(PATHS.API.PROXY.ACCOUNT.PUT(account.id || ""), {
+    console.log(initialCurrency);
+
+    const handleSubmit = async (skipCurrency?: boolean) => {
+        if (initialCurrency !== formData.currency && !skipCurrency) {
+            openPopupRef.current?.click();
+            return;
+        }
+
+        await fetch(PATHS.API.PROXY.ACCOUNT.PUT(account.id || ""), {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -143,15 +168,63 @@ function AccountEditForm({ account }: { account: AccountType }) {
                     onChange={handleChange}
                 />
             </div>
-            <SheetFooter className="flex gap-4">
-                <SheetClose ref={closeRef}>Cancel</SheetClose>
-                <Button
-                    onClick={handleSubmit}
-                    text="Save"
-                    active={isFormValid()}
-                    className="text-red px-5"
-                />
-            </SheetFooter>
+            <Dialog>
+                <SheetFooter className="flex gap-4">
+                    <SheetClose ref={closeRef}>Cancel</SheetClose>
+                    {initialCurrency !== formData.currency ? (
+                        <DialogTrigger asChild ref={openPopupRef}>
+                            <Button
+                                onClick={() => handleSubmit(false)}
+                                text="Save"
+                                active={isFormValid()}
+                                className="text-red px-5"
+                            />
+                        </DialogTrigger>
+                    ) : (
+                        <Button
+                            onClick={() => handleSubmit(false)}
+                            text="Save"
+                            active={isFormValid()}
+                            className="text-red px-5"
+                        />
+                    )}
+                </SheetFooter>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <div className="flex justify-between">
+                            <span>Delete Transaction</span>
+                            <div>
+                                <Image
+                                    src="/icons/close.svg"
+                                    width={35}
+                                    height={35}
+                                    alt="close popup"
+                                />
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    <div className="flex items-center space-x-2">
+                        <p>Are you sure you want to delete transaction?</p>
+                    </div>
+                    <DialogFooter className="flex justify-end items-center">
+                        <DialogClose asChild ref={closePopupRef}>
+                            <span
+                                onClick={() => {
+                                    handleSubmit(true);
+                                }}
+                            >
+                                Yes
+                            </span>
+                        </DialogClose>
+                        <DialogClose asChild>
+                            <Button
+                                text="No"
+                                onClick={() => closePopupRef.current?.click}
+                            />
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
@@ -159,6 +232,7 @@ function AccountEditForm({ account }: { account: AccountType }) {
 export function AccountCreateForm() {
     const [formData, setFormData] = useState<AccountType>(emptyAccount);
     const [error, setError] = useState<string>("");
+    const router = useRouter();
     const closeRef = useRef<HTMLButtonElement>(null);
     const { toast } = useToast();
 
@@ -174,7 +248,7 @@ export function AccountCreateForm() {
     };
 
     const handleSubmit = async () => {
-        await fetch(PATHS.API.PROXY.ACCOUNT.GET, {
+        await fetch(PATHS.API.PROXY.ACCOUNT.POST, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -189,8 +263,16 @@ export function AccountCreateForm() {
                 currency: formData.currency,
                 description: formData.description,
             }),
-        }).then((res) => {
+        }).then(async (res) => {
             if (res.status === 200) {
+                const data = await res.json();
+
+                localStorage.setItem("activeAccount", data.createdAccount.id);
+                localStorage.setItem(
+                    "activeAccountCurrency",
+                    data.createdAccount.currency
+                );
+                router.replace(PATHS.PAGES(data.createdAccount.id).HOME);
                 revalidate();
                 closeRef?.current?.click();
                 toast({

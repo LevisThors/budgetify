@@ -4,8 +4,10 @@ import Transaction from "../Transaction";
 
 export default function Card({
     transaction,
+    currency,
 }: {
     transaction: TransactionType;
+    currency: string;
 }) {
     return (
         <div className="w-full h-[90px] bg-white rounded-lg p-4 relative">
@@ -39,7 +41,8 @@ export default function Card({
                         }`}
                     >
                         {transaction.type === "Income" ? "" : "-"}
-                        {transaction.amount}$
+                        {transaction.amount}
+                        {currency}
                     </span>
                 </div>
             </div>

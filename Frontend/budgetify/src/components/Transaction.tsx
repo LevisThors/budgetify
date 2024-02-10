@@ -28,8 +28,8 @@ export default function Transaction({
                 <SheetHeader className="flex flex-row justify-between items-center">
                     <h1 className="text-2xl">
                         {activeType === "view"
-                            ? "Account Information"
-                            : "Edit Account"}
+                            ? "Transaction Information"
+                            : "Edit Transaction"}
                     </h1>
                     <div>
                         {activeType === "view" ? (

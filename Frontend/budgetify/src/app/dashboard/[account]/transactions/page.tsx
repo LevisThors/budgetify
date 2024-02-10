@@ -17,6 +17,8 @@ import PATHS from "@/paths";
 import PiggyBank from "@/components/PiggyBank";
 import FilterButton from "@/components/partials/FilterButton";
 import SearchBar from "@/components/partials/SearchBar";
+import SortBy from "@/components/partials/SortBy";
+import currencyToSymbol from "@/util/currencyToSymbol";
 
 interface TransactionsPageProps {
     params: {
@@ -28,7 +30,7 @@ interface TransactionsPageProps {
     };
 }
 
-export async function getTransactions(
+async function getTransactions(
     accountId: string,
     searchParams: { query?: string; type?: string } | null
 ) {
@@ -66,13 +68,21 @@ export default async function TransactionsPage({
                 <Suspense>
                     <SearchBar />
                 </Suspense>
-                {/* <SortBy /> */}
+                <SortBy />
                 {transactionsData?.message !== "Empty account" &&
-                    transactionsData.map((transaction: TransactionType) => (
-                        <Card key={transaction.id} transaction={transaction} />
-                    ))}
+                    transactionsData.transactions.map(
+                        (transaction: TransactionType) => (
+                            <Card
+                                key={transaction.id}
+                                transaction={transaction}
+                                currency={currencyToSymbol(
+                                    transactionsData.currency
+                                )}
+                            />
+                        )
+                    )}
             </div>
-            <div className="w-1/3 h-full flex flex-col justify-between">
+            <div className="w-1/3 h-full flex flex-col justify-between h-full">
                 <div className="flex flex-col gap-4">
                     <Suspense>
                         <FilterButton type="Income" />
