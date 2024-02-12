@@ -34,23 +34,34 @@ async function getTransactions(
     accountId: string,
     searchParams: { query?: string; type?: string } | null
 ) {
-    const response = await fetch(
-        `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
-            searchParams?.query ? `&query=${searchParams.query}` : ""
-        }${searchParams?.type ? `&type=${searchParams.type}` : ""}`,
-        {
-            headers: {
-                Cookie: `laravel_session=${
-                    cookies().get("laravel_session")?.value
-                }`,
-                Accept: "application/json",
-                "ngrok-skip-browser-warning": "69420",
-            },
-            credentials: "include",
-        }
-    );
+    try {
+        const response = await fetch(
+            `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
+                searchParams?.query ? `&query=${searchParams.query}` : ""
+            }${searchParams?.type ? `&type=${searchParams.type}` : ""}`,
+            {
+                headers: {
+                    Cookie: `laravel_session=${
+                        cookies().get("laravel_session")?.value
+                    }`,
+                    Accept: "application/json",
+                    "ngrok-skip-browser-warning": "69420",
+                },
+                credentials: "include",
+            }
+        );
 
-    return response.json();
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error(
+            "A problem occurred while fetching the transactions:",
+            error
+        );
+    }
 }
 
 export default async function TransactionsPage({
@@ -70,7 +81,7 @@ export default async function TransactionsPage({
                 </Suspense>
                 <SortBy />
                 {transactionsData?.message !== "Empty account" &&
-                    transactionsData?.transactions.map(
+                    transactionsData?.transactions?.map(
                         (transaction: TransactionType) => (
                             <Card
                                 key={transaction.id}
