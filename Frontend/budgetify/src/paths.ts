@@ -33,6 +33,14 @@ const PATHS = {
                 DELETE: (obligatoryId: string | number) =>
                     `/backend/api/obligatories/${obligatoryId}`,
             },
+            PIGGY_BANK: {
+                GET: "/backend/api/piggy-banks",
+                POST: "/backend/api/piggy-banks",
+                PUT: (obligatoryId: string | number) =>
+                    `/backend/api/piggy-banks/${obligatoryId}`,
+                DELETE: (obligatoryId: string | number) =>
+                    `/backend/api/piggy-banks/${obligatoryId}`,
+            },
             AUTH: {
                 GET_CSRF: "/backend/sanctum/csrf-cookie",
                 LOGIN: "/backend/api/login",
@@ -57,6 +65,12 @@ const PATHS = {
             },
             OBLIGATORY: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/obligatories`,
+            },
+            PIGGY_BANK: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/piggy-banks`,
+            },
+            CATEGORY_STATISTICS: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories/statistics`,
             },
         },
     },

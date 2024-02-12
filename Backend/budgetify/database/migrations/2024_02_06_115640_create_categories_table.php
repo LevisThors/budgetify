@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->enum('type', ['Income', 'Expenses']);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('account_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();
         });

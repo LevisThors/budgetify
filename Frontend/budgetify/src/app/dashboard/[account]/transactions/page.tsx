@@ -82,7 +82,7 @@ export default async function TransactionsPage({
                         )
                     )}
             </div>
-            <div className="w-1/3 h-full flex flex-col justify-between h-full">
+            <div className="w-1/3 flex flex-col justify-between h-full gap-4">
                 <div className="flex flex-col gap-4">
                     <Suspense>
                         <FilterButton type="Income" />
@@ -139,7 +139,7 @@ export default async function TransactionsPage({
                     </Suspense>
                 </div>
                 <div>
-                    <PiggyBank />
+                    <PiggyBank accountId={params.account} />
                 </div>
             </div>
         </section>

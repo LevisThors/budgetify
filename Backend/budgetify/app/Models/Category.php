@@ -12,21 +12,21 @@ class Category extends Model
     protected $fillable = [
         'name',
         'type',
-        'user_id',
+        'account_id',
     ];
 
-    public function user()
+    public function account()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Account::class);
     }
 
     public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->belongsToMany(Transaction::class);
     }
 
     public function subscriptions()
     {
-        return $this->hasMany(Subscription::class);
+        return $this->belongsToMany(Subscription::class);
     }
 }

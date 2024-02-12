@@ -33,8 +33,11 @@ Route::middleware("web")->group(function () {
 
         Route::get('/categories', [CategoryController::class, 'getAll']);
         Route::post('/categories', [CategoryController::class, 'store']);
+        Route::get('/categories/statistics', [CategoryController::class, 'getStatistics']);
 
         Route::get('/transactions', [TransactionController::class, 'getAll']);
+        Route::put('/transactions/{id}', [TransactionController::class, 'update']);
+        Route::delete('/transactions/{id}', [TransactionController::class, 'delete']);
         Route::post('/transactions', [TransactionController::class, 'store']);
 
         Route::get('/subscription', [SubscriptionController::class, 'getAll']);
@@ -46,6 +49,8 @@ Route::middleware("web")->group(function () {
         Route::post('/accounts', [AccountController::class, 'store']);
 
         Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
+        Route::put('/piggy-banks/{id}', [PiggyBankController::class, 'update']);
+        Route::delete('/piggy-banks/{id}', [PiggyBankController::class, 'delete']);
         Route::post('/piggy-banks', [PiggyBankController::class, 'store']);
 
         Route::get('/obligatories', [ObligatoryController::class, 'getAll']);

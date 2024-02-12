@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('goal');
             $table->decimal('goal_amount', 8, 2);
-            $table->decimal('saved_amount', 8, 2);
+            $table->decimal('saved_amount', 8, 2)->default(0);
             $table->date('date');
             $table->foreignId('account_id')->constrained()->onDelete('cascade');
 

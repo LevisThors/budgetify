@@ -19,6 +19,12 @@ export default function Transaction({
 }) {
     const [activeType, setActiveType] = useState("view");
 
+    const handleChangeActiveType = (type: string) => {
+        setActiveType(type);
+    };
+
+    const handleDelete = async () => {};
+
     return (
         <Sheet>
             <SheetTrigger>
@@ -48,6 +54,7 @@ export default function Transaction({
                                         alt="delete account"
                                         width={32}
                                         height={32}
+                                        onClick={handleDelete}
                                     />
                                 </button>
                             </>
@@ -62,7 +69,11 @@ export default function Transaction({
                         </SheetClose>
                     </div>
                 </SheetHeader>
-                <TransactionForm type={activeType} transaction={transaction} />
+                <TransactionForm
+                    type={activeType}
+                    changeActiveType={handleChangeActiveType}
+                    transaction={transaction}
+                />
             </SheetContent>
         </Sheet>
     );

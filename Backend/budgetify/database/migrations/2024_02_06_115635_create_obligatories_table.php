@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();
             $table->decimal('amount', 8, 2)->nullable();
-            $table->date('payment_dates');
+            $table->date('payment_date');
             $table->foreignId('account_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();

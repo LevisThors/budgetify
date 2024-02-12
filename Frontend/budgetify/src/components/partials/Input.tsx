@@ -4,7 +4,7 @@ import { useState } from "react";
 
 interface InputProps {
     value: string;
-    onChange: (
+    onChange?: (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => void;
     type?: "select" | "text" | "number" | "date" | "multiselect";
@@ -15,6 +15,7 @@ interface InputProps {
     maxLength?: number;
     options?: string[];
     defaultOption?: string;
+    disabled?: boolean;
 }
 
 export default function Input({
@@ -28,6 +29,7 @@ export default function Input({
     maxLength = 255,
     options,
     defaultOption,
+    disabled,
 }: InputProps) {
     const [throwRequired, setThrowRequired] = useState(false);
     const [throwMaxLengthError, setThrowMaxLengthError] = useState(false);
@@ -44,8 +46,8 @@ export default function Input({
     return (
         <div>
             <fieldset
-                className={`${
-                    throwRequired ? "border-red-500" : ""
+                className={`${throwRequired ? "border-red-500" : ""} ${
+                    disabled ? "opacity-50" : ""
                 } border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2`}
             >
                 <legend className="text-sm ms-2 px-1 text-gray-400">
