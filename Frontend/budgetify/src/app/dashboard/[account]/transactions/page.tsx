@@ -70,7 +70,7 @@ export default async function TransactionsPage({
                 </Suspense>
                 <SortBy />
                 {transactionsData?.message !== "Empty account" &&
-                    transactionsData.transactions.map(
+                    transactionsData?.transactions.map(
                         (transaction: TransactionType) => (
                             <Card
                                 key={transaction.id}
