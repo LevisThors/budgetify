@@ -29,7 +29,7 @@ export default async function PiggyBank({ accountId }: { accountId: string }) {
         <div className="flex flex-col gap-4">
             <Suspense>
                 <PiggyBankButton />
-                {piggyBanks.map((piggyBank: PiggyBankType) => (
+                {piggyBanks?.map((piggyBank: PiggyBankType) => (
                     <PiggyBankButton
                         key={piggyBank.id}
                         piggyBank={{ ...piggyBank, currency: currency }}
