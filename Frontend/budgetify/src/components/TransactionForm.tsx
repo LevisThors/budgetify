@@ -30,7 +30,7 @@ const emptyTransaction = {
     payment_date: "",
     payee: "",
     description: "",
-    media: [] as File[],
+    media: [] as File[] | undefined,
 };
 
 interface TransactionFormProps {

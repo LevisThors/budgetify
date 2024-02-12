@@ -79,7 +79,7 @@ function AccountEditForm({
     changeType,
 }: {
     account: AccountType;
-    changeType: (type: string) => void;
+    changeType?: (type: string) => void;
 }) {
     const initialCurrency = account.currency;
     const [formData, setFormData] = useState<AccountType>(account);
@@ -126,7 +126,7 @@ function AccountEditForm({
         }).then((res) => {
             if (res.status === 200) {
                 revalidate(`/dashboard/${account.id}/transactions`);
-                changeType("view");
+                if (changeType) changeType("view");
                 toast({
                     description: "Account has been updated successfully",
                 });
@@ -174,7 +174,12 @@ function AccountEditForm({
             </div>
 
             <SheetFooter className="flex gap-4">
-                <SheetClose ref={closeRef} onClick={() => changeType("view")}>
+                <SheetClose
+                    ref={closeRef}
+                    onClick={() => {
+                        if (changeType) changeType("view");
+                    }}
+                >
                     Cancel
                 </SheetClose>
                 <Dialog>

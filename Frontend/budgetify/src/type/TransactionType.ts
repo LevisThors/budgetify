@@ -9,7 +9,7 @@ export interface TransactionType {
     payment_date: Date;
     payee: string;
     categories: CategoryType[];
-    media?: File[];
+    media?: File[] | undefined;
     [key: string]:
         | string
         | number

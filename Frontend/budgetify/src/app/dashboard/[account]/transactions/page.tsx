@@ -112,7 +112,7 @@ export default async function TransactionsPage({
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    You don't have transactions
+                                    You don&apos;t have transactions
                                 </span>
                             )}
                         </div>
