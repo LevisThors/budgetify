@@ -1,7 +1,7 @@
 interface ButtonProps {
     text: string;
     active?: boolean;
-    onClick: (e: any) => void;
+    onClick?: (e: any) => void;
     className?: string;
 }
 

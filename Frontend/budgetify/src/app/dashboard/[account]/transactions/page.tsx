@@ -19,6 +19,7 @@ import FilterButton from "@/components/partials/FilterButton";
 import SearchBar from "@/components/partials/SearchBar";
 import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TransactionsPageProps {
     params: {
@@ -27,17 +28,20 @@ interface TransactionsPageProps {
     searchParams?: {
         query?: string;
         type?: string;
+        sort?: string;
     };
 }
 
 async function getTransactions(
     accountId: string,
-    searchParams: { query?: string; type?: string } | null
+    searchParams: { query?: string; type?: string; sort?: string } | null
 ) {
     const response = await fetch(
         `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
             searchParams?.query ? `&query=${searchParams.query}` : ""
-        }${searchParams?.type ? `&type=${searchParams.type}` : ""}`,
+        }${searchParams?.type ? `&type=${searchParams.type}` : ""}${
+            searchParams?.sort ? `&sort=${searchParams.sort}` : ""
+        }`,
         {
             headers: {
                 Cookie: `laravel_session=${
@@ -53,6 +57,24 @@ async function getTransactions(
     return response.json();
 }
 
+const getCategories = async (accountId: string) => {
+    const res = await fetch(
+        `${PATHS.API.BASE.CATEGORY.GET}?account_id=${accountId}`,
+        {
+            headers: {
+                Cookie: `laravel_session=${
+                    cookies().get("laravel_session")?.value
+                }`,
+                "X-XSRF-TOKEN": cookies().get("XSRF-TOKEN")?.value || "",
+                "ngrok-skip-browser-warning": "69420",
+            },
+            credentials: "include",
+        }
+    );
+
+    return res.json();
+};
+
 export default async function TransactionsPage({
     params,
     searchParams,
@@ -62,6 +84,10 @@ export default async function TransactionsPage({
         searchParams || null
     );
 
+    const category = await getCategories(params.account);
+    const hasCategories =
+        category.Expenses.length > 0 || category.Income.length > 0;
+
     return (
         <section className="flex w-full justify-between h-full">
             <div className="w-2/3 px-16 flex flex-col gap-5">
@@ -69,18 +95,29 @@ export default async function TransactionsPage({
                     <SearchBar />
                 </Suspense>
                 <SortBy />
-                {transactionsData?.message !== "Empty account" &&
-                    transactionsData?.transactions?.map(
-                        (transaction: TransactionType) => (
-                            <Card
-                                key={transaction.id}
-                                transaction={transaction}
-                                currency={currencyToSymbol(
-                                    transactionsData.currency
-                                )}
-                            />
-                        )
-                    )}
+                <Suspense>
+                    <ScrollArea>
+                        <div className="max-h-[75vh] flex flex-col gap-5">
+                            {transactionsData?.message !== "Empty account" ? (
+                                transactionsData?.transactions?.map(
+                                    (transaction: TransactionType) => (
+                                        <Card
+                                            key={transaction.id}
+                                            transaction={transaction}
+                                            currency={currencyToSymbol(
+                                                transactionsData.currency
+                                            )}
+                                        />
+                                    )
+                                )
+                            ) : (
+                                <span className="w-full text-center">
+                                    You don't have transactions
+                                </span>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </Suspense>
             </div>
             <div className="w-1/3 flex flex-col justify-between h-full gap-4">
                 <div className="flex flex-col gap-4">
@@ -111,12 +148,14 @@ export default async function TransactionsPage({
                             </SheetContent>
                         </Sheet>
                         <Sheet>
-                            <SheetTrigger>
-                                <ActionButton
-                                    text="Add Transaction"
-                                    needsAccount={true}
-                                />
-                            </SheetTrigger>
+                            {hasCategories && (
+                                <SheetTrigger>
+                                    <ActionButton
+                                        text="Add Transaction"
+                                        needsAccount={true}
+                                    />
+                                </SheetTrigger>
+                            )}
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">

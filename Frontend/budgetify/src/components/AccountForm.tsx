@@ -11,20 +11,13 @@ import Button from "./partials/Button";
 import { useToast } from "./ui/use-toast";
 import PATHS from "@/paths";
 import { useRouter } from "next/navigation";
-import {
-    DialogTrigger,
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogClose,
-    DialogHeader,
-} from "./ui/dialog";
-import Image from "next/image";
-import { skip } from "node:test";
+import { DialogTrigger, Dialog } from "./ui/dialog";
+import DialogBody from "./partials/DialogBody";
 
 interface AccountFormProps {
     type: "view" | "edit" | "create";
     account?: AccountType;
+    changeType?: (type: string) => void;
 }
 
 const displayFields = ["Title", "Balance", "Currency", "Description"];
@@ -35,7 +28,11 @@ const emptyAccount = {
     description: "",
 };
 
-export default function AccountForm({ type, account }: AccountFormProps) {
+export default function AccountForm({
+    type,
+    account,
+    changeType,
+}: AccountFormProps) {
     switch (type) {
         case "view":
             return (
@@ -44,7 +41,10 @@ export default function AccountForm({ type, account }: AccountFormProps) {
 
         case "edit":
             return (
-                <AccountEditForm account={account ? account : emptyAccount} />
+                <AccountEditForm
+                    account={account ? account : emptyAccount}
+                    changeType={changeType}
+                />
             );
 
         case "create":
@@ -74,12 +74,17 @@ function AccountViewForm({ account }: { account: AccountType }) {
     );
 }
 
-function AccountEditForm({ account }: { account: AccountType }) {
+function AccountEditForm({
+    account,
+    changeType,
+}: {
+    account: AccountType;
+    changeType: (type: string) => void;
+}) {
     const initialCurrency = account.currency;
     const [formData, setFormData] = useState<AccountType>(account);
     const closeRef = useRef<HTMLButtonElement>(null);
     const openPopupRef = useRef<HTMLButtonElement>(null);
-    const closePopupRef = useRef<HTMLButtonElement>(null);
     const [error, setError] = useState<string>("");
     const { toast } = useToast();
 
@@ -97,8 +102,6 @@ function AccountEditForm({ account }: { account: AccountType }) {
     const isFormValid = () => {
         return formData.title.trim() !== "" && formData.currency.trim() !== "";
     };
-
-    console.log(initialCurrency);
 
     const handleSubmit = async (skipCurrency?: boolean) => {
         if (initialCurrency !== formData.currency && !skipCurrency) {
@@ -123,6 +126,7 @@ function AccountEditForm({ account }: { account: AccountType }) {
         }).then((res) => {
             if (res.status === 200) {
                 revalidate(`/dashboard/${account.id}/transactions`);
+                changeType("view");
                 toast({
                     description: "Account has been updated successfully",
                 });
@@ -168,9 +172,12 @@ function AccountEditForm({ account }: { account: AccountType }) {
                     onChange={handleChange}
                 />
             </div>
-            <Dialog>
-                <SheetFooter className="flex gap-4">
-                    <SheetClose ref={closeRef}>Cancel</SheetClose>
+
+            <SheetFooter className="flex gap-4">
+                <SheetClose ref={closeRef} onClick={() => changeType("view")}>
+                    Cancel
+                </SheetClose>
+                <Dialog>
                     {initialCurrency !== formData.currency ? (
                         <DialogTrigger asChild ref={openPopupRef}>
                             <Button
@@ -188,43 +195,13 @@ function AccountEditForm({ account }: { account: AccountType }) {
                             className="text-red px-5"
                         />
                     )}
-                </SheetFooter>
-                <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
-                        <div className="flex justify-between">
-                            <span>Delete Transaction</span>
-                            <div>
-                                <Image
-                                    src="/icons/close.svg"
-                                    width={35}
-                                    height={35}
-                                    alt="close popup"
-                                />
-                            </div>
-                        </div>
-                    </DialogHeader>
-                    <div className="flex items-center space-x-2">
-                        <p>Are you sure you want to delete transaction?</p>
-                    </div>
-                    <DialogFooter className="flex justify-end items-center">
-                        <DialogClose asChild ref={closePopupRef}>
-                            <span
-                                onClick={() => {
-                                    handleSubmit(true);
-                                }}
-                            >
-                                Yes
-                            </span>
-                        </DialogClose>
-                        <DialogClose asChild>
-                            <Button
-                                text="No"
-                                onClick={() => closePopupRef.current?.click}
-                            />
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                    <DialogBody
+                        header="Edit Account"
+                        body="Are you sure you want to change currency of the account?"
+                        onYes={() => handleSubmit(true)}
+                    />
+                </Dialog>
+            </SheetFooter>
         </div>
     );
 }

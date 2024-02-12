@@ -13,9 +13,9 @@ const PATHS = {
                 GET: "/backend/api/transactions",
                 POST: "/backend/api/transactions",
                 PUT: (transactionId: string | number) =>
-                    `/backend/api/transaction/${transactionId}`,
+                    `/backend/api/transactions/${transactionId}`,
                 DELETE: (transactionId: string | number) =>
-                    `/backend/api/transaction/${transactionId}`,
+                    `/backend/api/transactions/${transactionId}`,
             },
             CATEGORY: {
                 GET: "/backend/api/categories",

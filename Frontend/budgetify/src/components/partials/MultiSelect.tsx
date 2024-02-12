@@ -1,7 +1,7 @@
 "use client";
 
 import { CategoryType } from "@/type/CategoryType";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DataSlider from "./DataSlider";
 import Image from "next/image";
 
@@ -20,8 +20,13 @@ export default function MultiSelect({
     selected,
 }: MultiSelectProps) {
     const [newData, setNewData] = useState<CategoryType[]>(categories);
+    console.log(newData);
     const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
     const [touched, setTouched] = useState<boolean>(false);
+
+    useEffect(() => {
+        setNewData(categories);
+    }, [categories]);
 
     const handleRemove = (id: string) => {
         setNewData((prev) => [
@@ -55,7 +60,7 @@ export default function MultiSelect({
                         touched && required && selected?.length === 0
                             ? "border-red-500"
                             : ""
-                    } border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2`}
+                    } relative border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2`}
                 >
                     <legend className="text-sm ms-2 px-1 text-gray-400">
                         {label}{" "}
@@ -64,7 +69,8 @@ export default function MultiSelect({
                         </span>
                     </legend>
                     <span
-                        className="absolute right-0 top-0 h-full bg-white z-10 flex items-center w-10 justify-center"
+                        className="absolute right-0 top-[50%] h-full bg-white z-10 flex items-center w-10 justify-center
+                         cursor-pointer py-2 box-content -translate-y-[50%]"
                         onClick={toggleMasonry}
                     >
                         <Image

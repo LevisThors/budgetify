@@ -20,8 +20,7 @@ class TransactionController extends Controller
     {
         if (is_numeric($request->account_id)) {
             $query = $this->getModel()::where('account_id', $request['account_id'])
-                ->with('categories')
-                ->orderBy('payment_date', 'desc');
+                ->with('categories');
 
             if (isset($request->type)) {
                 $query->where('type', $request->type);
@@ -37,7 +36,10 @@ class TransactionController extends Controller
             }
 
             if (isset($request['sort'])) {
-                $query->orderBy($request['sort']);
+                [$column, $direction] = explode('-', $request['sort']);
+                $query->orderBy($column, $direction);
+            } else {
+                $query->orderBy('payment_date', 'desc');
             }
 
             $transactions = $query->get();
@@ -125,6 +127,12 @@ class TransactionController extends Controller
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
+        $account = $transaction->account;
+        $account->balance = $transaction->type === "Expenses"
+            ? $account->balance + $transaction->amount
+            : $account->balance - $transaction->amount;
+
+        $account->save();
         $transaction->delete();
 
         return response()->json(['message' => 'Transaction deleted'], 200);
@@ -143,14 +151,14 @@ class TransactionController extends Controller
                     'amount' => $request['amount'],
                     'payment_date' => $request['payment_date'],
                     'payee' => $request['payee'] ? $request['payee']
-                        : Auth::user()->first_name . ' ' . Auth::user()->last_name,
+                        : '',
                     'account_id' => $request->account_id,
                 ]);
 
                 if (isset($request['categories'])) {
-                    $userCategories = Auth::user()->categories->pluck('id')->toArray();
+                    $accountCategories = Account::find($request->account_id)->first()->categories->pluck('id')->toArray();
 
-                    if (array_diff($request['categories'], $userCategories)) {
+                    if (array_diff($request['categories'], $accountCategories)) {
                         DB::rollBack();
                         return response()->json(['message' => 'Some categories do not belong to the user'], 400);
                     }

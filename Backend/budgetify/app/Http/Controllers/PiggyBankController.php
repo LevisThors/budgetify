@@ -16,6 +16,11 @@ class PiggyBankController extends Controller
     public function getAll(Request $request)
     {
         $piggyBanks = $this->getModel()::where("account_id", $request->account_id)->get();
+
+        if ($piggyBanks->isEmpty()) {
+            return response()->json(["error" => "No piggy banks found"], 400);
+        }
+
         $currency = $piggyBanks->first()->account->currency;
 
         return response()->json(["piggyBanks" => $piggyBanks, "currency" => $currency], 200);

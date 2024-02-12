@@ -12,13 +12,22 @@ import Button from "./partials/Button";
 import Dropzone from "./partials/Dropzone";
 import MultiSelect from "./partials/MultiSelect";
 import PATHS from "@/paths";
+import Image from "next/image";
+import {
+    DialogTrigger,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogClose,
+    DialogHeader,
+} from "./ui/dialog";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
     title: "",
     categories: [] as CategoryType[],
     amount: 0,
-    payment_date: new Date(),
+    payment_date: "",
     payee: "",
     description: "",
     media: [] as File[],
@@ -95,14 +104,18 @@ function TransactionViewForm({
                         {transaction.payment_date.toString()}
                     </span>
                 </div>
-                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                    <span className="w-1/3 font-bold">Payee:</span>
-                    <span className="w-2/3">{transaction.payee}</span>
-                </div>
-                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                    <span className="w-1/3 font-bold">Description:</span>
-                    <span className="w-2/3">{transaction.description}</span>
-                </div>
+                {transaction.payee && (
+                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                        <span className="w-1/3 font-bold">Payee:</span>
+                        <span className="w-2/3">{transaction.payee}</span>
+                    </div>
+                )}
+                {transaction.description && (
+                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                        <span className="w-1/3 font-bold">Description:</span>
+                        <span className="w-2/3">{transaction.description}</span>
+                    </div>
+                )}
             </div>
             <div>mediaItem</div>
         </div>
@@ -334,8 +347,41 @@ function TransactionCreateForm({
                     onDelete={handleFileDelete}
                 />
             </div>
+            <SheetClose ref={closeRef}></SheetClose>
             <SheetFooter className="flex gap-4">
-                <SheetClose ref={closeRef}>Cancel</SheetClose>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <button>Cancel</button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                            <div className="flex justify-between">
+                                <span>This transaction will not be saved</span>
+                                <div>
+                                    <Image
+                                        src="/icons/close.svg"
+                                        width={35}
+                                        height={35}
+                                        alt="close popup"
+                                    />
+                                </div>
+                            </div>
+                        </DialogHeader>
+                        <div className="flex items-center space-x-2">
+                            <p>Are you sure you want to cancel?</p>
+                        </div>
+                        <DialogFooter className="flex justify-end items-center">
+                            <DialogClose asChild>
+                                <span onClick={() => closeRef.current?.click()}>
+                                    Yes
+                                </span>
+                            </DialogClose>
+                            <DialogClose asChild>
+                                <Button text="No" onClick={() => {}} />
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
                 <Button
                     onClick={handleSubmit}
                     text="Save"
