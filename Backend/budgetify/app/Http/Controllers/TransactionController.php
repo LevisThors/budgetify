@@ -44,6 +44,10 @@ class TransactionController extends Controller
 
             $transactions = $query->get();
 
+            if ($transactions->count() == 0) {
+                return response()->json(['message' => 'Empty account'], 200);
+            }
+
             return response()->json(
                 [
                     "transactions" => $transactions,

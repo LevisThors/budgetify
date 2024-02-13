@@ -33,6 +33,8 @@ Route::middleware("web")->group(function () {
 
         Route::get('/categories', [CategoryController::class, 'getAll']);
         Route::post('/categories', [CategoryController::class, 'store']);
+        Route::delete('/categories/{id}', [CategoryController::class, 'delete']);
+        Route::put('/categories/{id}', [CategoryController::class, 'update']);
         Route::get('/categories/statistics', [CategoryController::class, 'getStatistics']);
 
         Route::get('/transactions', [TransactionController::class, 'getAll']);

@@ -20,7 +20,6 @@ export default function MultiSelect({
     selected,
 }: MultiSelectProps) {
     const [newData, setNewData] = useState<CategoryType[]>(categories);
-    console.log(newData);
     const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
     const [touched, setTouched] = useState<boolean>(false);
 
