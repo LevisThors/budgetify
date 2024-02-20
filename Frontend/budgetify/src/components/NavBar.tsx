@@ -18,7 +18,7 @@ export default function NavBar() {
     return (
         <nav className="flex justify-between py-7 items-center">
             <div>
-                <span>Budgetify</span>
+                <Link href={PATHS.PAGES(accountId).HOME}>Budgetify</Link>
             </div>
             <div>
                 <ul className="flex gap-5 text-md">

@@ -279,11 +279,13 @@ function TransactionCreateForm({
                             <button onClick={() => setError("")}>X</button>
                         </div>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex gap-1 w-fit border border-authBlack rounded-lg">
                         {["Expenses", "Income"].map((type) => (
-                            <span
+                            <div
                                 key={type}
-                                className={`w-fit text-xl border border-authBlack p-2 rounded-lg cursor-pointer ${
+                                className={`w-fit text-xl flex gap-1.5 ${
+                                    type === "Expenses" ? "border-r" : ""
+                                } border-authBlack p-2 rounded-lg cursor-pointer ${
                                     formData.type !== type ? "opacity-50" : ""
                                 } `}
                                 onClick={() =>
@@ -293,8 +295,27 @@ function TransactionCreateForm({
                                     })
                                 }
                             >
-                                {type}
-                            </span>
+                                <span
+                                    className={`h-[30px] w-[30px] flex justify-center items-center rounded-full ${
+                                        type === "Income"
+                                            ? "bg-[#21C206]"
+                                            : "bg-[#EE3F19]"
+                                    }`}
+                                >
+                                    <Image
+                                        src="/icons/arrow.svg"
+                                        width={15}
+                                        height={17}
+                                        alt="filter-button"
+                                        className={
+                                            type === "Expenses"
+                                                ? "transform rotate-180"
+                                                : ""
+                                        }
+                                    />
+                                </span>
+                                <span>{type}</span>
+                            </div>
                         ))}
                     </div>
                 </div>

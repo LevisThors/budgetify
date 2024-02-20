@@ -19,7 +19,7 @@ class CategoryController extends Controller
     {
         $account = Account::find($request->account_id);
 
-        $existingCategory = $account->categories()->where('title', $request->title)->first();
+        $existingCategory = $account->categories()->where('type', $request->type)->where('title', $request->title)->first();
 
         if ($existingCategory) {
             return response()->json(['error' => 'A category with this title already exists.'], 400);

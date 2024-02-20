@@ -23,14 +23,15 @@ export default function DialogBody({
             <DialogHeader>
                 <div className="flex justify-between">
                     <span>{header}</span>
-                    <div>
+                    <DialogClose>
                         <Image
                             src="/icons/close.svg"
                             width={35}
                             height={35}
                             alt="close popup"
+                            className="cursor-pointer"
                         />
-                    </div>
+                    </DialogClose>
                 </div>
             </DialogHeader>
             <div className="flex items-center space-x-2">
@@ -38,7 +39,9 @@ export default function DialogBody({
             </div>
             <DialogFooter className="flex justify-end items-center">
                 <DialogClose asChild>
-                    <span onClick={onYes}>Yes</span>
+                    <button onClick={onYes} className="cursor-pointer">
+                        Yes
+                    </button>
                 </DialogClose>
                 <DialogClose asChild>
                     <Button text="No" onClick={onNo || undefined} />

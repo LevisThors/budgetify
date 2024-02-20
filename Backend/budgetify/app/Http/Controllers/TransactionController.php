@@ -160,7 +160,7 @@ class TransactionController extends Controller
                 ]);
 
                 if (isset($request['categories'])) {
-                    $accountCategories = Account::find($request->account_id)->first()->categories->pluck('id')->toArray();
+                    $accountCategories = Account::find($request->account_id)->categories->pluck('id')->toArray();
 
                     if (array_diff($request['categories'], $accountCategories)) {
                         DB::rollBack();
