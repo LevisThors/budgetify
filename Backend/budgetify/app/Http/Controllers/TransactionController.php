@@ -42,16 +42,29 @@ class TransactionController extends Controller
                 $query->orderBy('payment_date', 'desc');
             }
 
-            $transactions = $query->get();
+            // $transactions = $query->get();
+
+            $transactions = $query->get()->map(function ($transaction) {
+                $transaction->documents = $transaction->getMedia()->map(function ($media) {
+                    return [
+                        'path' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
+                        'name' => $media->name,
+                    ];
+                });
+
+                return $transaction;
+            });
 
             if ($transactions->count() == 0) {
                 return response()->json(['message' => 'Empty account'], 200);
             }
 
+            Log::info($transactions[0]->documents);
+
             return response()->json(
                 [
-                    "transactions" => $transactions,
-                    "currency" => Account::find($request->account_id)->first()->currency
+                    'transactions' => $transactions,
+                    'currency' => Account::find($request->account_id)->first()->currency,
                 ],
                 200
             );

@@ -21,6 +21,8 @@ import {
     DialogClose,
     DialogHeader,
 } from "./ui/dialog";
+import DocumentImage from "./partials/DocumentImage";
+import ActionButton from "./partials/ActionButton";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -69,6 +71,11 @@ function TransactionViewForm({
 }: {
     transaction: TransactionType;
 }) {
+    const [isDocumentOpen, setIsDocumentOpen] = useState(false);
+    const handleCloseDocument = () => {
+        setIsDocumentOpen((prev) => !prev);
+    };
+
     return (
         <div className="flex flex-col gap-4">
             <div className="flex justify-between">
@@ -117,7 +124,49 @@ function TransactionViewForm({
                     </div>
                 )}
             </div>
-            <div>mediaItem</div>
+            <div>
+                {transaction.documents?.map(
+                    (document: { path: string; name: string }) => (
+                        <div key={document.path}>
+                            <div
+                                className="flex items-center justify-between w-full border-b py-1.5 border-authBlack last:border-none"
+                                onClick={handleCloseDocument}
+                            >
+                                <div className="flex items-center">
+                                    <Image
+                                        src="/icons/image.svg"
+                                        alt="Uploaded image"
+                                        width={70}
+                                        height={60}
+                                    />
+                                    <span className="text-xs max-w-full overflow-ellipsis">
+                                        {document.name}
+                                    </span>
+                                </div>
+                                <div className="h-[50px]">
+                                    <button className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5">
+                                        <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
+                                            <Image
+                                                src="/icons/download.svg"
+                                                width={15}
+                                                height={17}
+                                                alt="filter-button"
+                                            />
+                                        </span>
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                            {isDocumentOpen && (
+                                <DocumentImage
+                                    imagePath={document.path}
+                                    closeDocument={handleCloseDocument}
+                                />
+                            )}
+                        </div>
+                    )
+                )}
+            </div>
         </div>
     );
 }
@@ -339,6 +388,7 @@ function TransactionCreateForm({
                 <Input
                     label="Amount"
                     name="amount"
+                    type="number"
                     value={formData.amount.toString()}
                     onChange={handleChange}
                     required={true}

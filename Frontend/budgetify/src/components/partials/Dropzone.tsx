@@ -30,9 +30,13 @@ export default function Dropzone({
     };
 
     const handleFile = (file: File) => {
-        setFileNames((prev) => (prev ? [...prev, file.name] : [file.name]));
-        onFileUpload(file);
-        setError(null);
+        if (fileNames && fileNames.length <= 4) {
+            setFileNames((prev) => (prev ? [...prev, file.name] : [file.name]));
+            onFileUpload(file);
+            setError(null);
+        } else {
+            setError("You can only upload 5 images");
+        }
     };
 
     const handleClick = () => {
@@ -83,11 +87,7 @@ export default function Dropzone({
                 style={{ display: "none" }}
             />
 
-            {error && (
-                <span className="input-validation input-validation-fail">
-                    {error}
-                </span>
-            )}
+            {error && <span className="text-red-500 text-sm">{error}</span>}
         </div>
     );
 }

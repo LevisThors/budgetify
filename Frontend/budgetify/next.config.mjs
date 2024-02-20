@@ -8,6 +8,14 @@ const nextConfig = {
             },
         ];
     },
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "afa0-95-137-233-69.ngrok-free.app",
+            },
+        ],
+    },
 };
 
 export default nextConfig;

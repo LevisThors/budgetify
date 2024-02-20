@@ -10,6 +10,10 @@ export interface TransactionType {
     payee: string;
     categories: CategoryType[];
     media?: File[] | undefined;
+    documents?: {
+        path: string;
+        name: string;
+    }[];
     [key: string]:
         | string
         | number
@@ -17,5 +21,6 @@ export interface TransactionType {
         | CategoryType[]
         | File[]
         | Date
+        | { path: string; name: string }[]
         | undefined;
 }
