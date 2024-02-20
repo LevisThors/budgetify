@@ -18,6 +18,7 @@ import PATHS from "@/paths";
 import { getCookie } from "cookies-next";
 import revalidate from "@/util/revalidate";
 import { toast } from "./ui/use-toast";
+import MESSAGE from "@/messages";
 
 export default function Transaction({
     transaction,
@@ -45,7 +46,7 @@ export default function Transaction({
             if (res.status === 200) {
                 revalidate();
                 toast({
-                    description: "Transaction has been deleted",
+                    description: MESSAGE.SUCCESS.DELETE("Transaction"),
                     variant: "destructive",
                 });
                 closeRef?.current?.click();

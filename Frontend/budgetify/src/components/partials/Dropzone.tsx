@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import MESSAGE from "@/messages";
 
 export default function Dropzone({
     onFileUpload,
@@ -35,7 +36,7 @@ export default function Dropzone({
             onFileUpload(file);
             setError(null);
         } else {
-            setError("You can only upload 5 images");
+            setError(MESSAGE.ERROR.MAX_FILES(5));
         }
     };
 

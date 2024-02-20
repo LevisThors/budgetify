@@ -2,7 +2,6 @@ import PATHS from "@/paths";
 import { cookies } from "next/headers";
 import { PiggyBankType } from "@/type/PiggyBankType";
 import { Suspense } from "react";
-import PiggyBankForm from "./PiggyBankForm";
 import PiggyBankButton from "./partials/PiggyBankButton";
 
 async function getPiggyBanks(accountId: string) {

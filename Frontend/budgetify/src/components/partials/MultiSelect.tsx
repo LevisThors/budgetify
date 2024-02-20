@@ -4,28 +4,46 @@ import { CategoryType } from "@/type/CategoryType";
 import { useState, useEffect } from "react";
 import DataSlider from "./DataSlider";
 import Image from "next/image";
+import ActionButton from "./ActionButton";
+import Input from "./Input";
+import Button from "./Button";
+import PATHS from "@/paths";
+import { getCookie } from "cookies-next";
+import revalidate from "@/util/revalidate";
+import MESSAGE from "@/messages";
 
 interface MultiSelectProps {
     label: string;
     required?: boolean;
     categories: CategoryType[];
+    refetch: () => void;
     onSelect: (id: string, action: "add" | "delete") => void;
     selected?: CategoryType[];
+    type?: string;
 }
 export default function MultiSelect({
     label,
     required,
     categories,
+    refetch,
     onSelect,
     selected,
+    type,
 }: MultiSelectProps) {
     const [newData, setNewData] = useState<CategoryType[]>(categories);
     const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
     const [touched, setTouched] = useState<boolean>(false);
+    const [isCategoryInput, setIsCategoryInput] = useState(false);
+    const [category, setCategory] = useState<string>("");
+    const [error, setError] = useState<string>("");
 
     useEffect(() => {
         setNewData(categories);
     }, [categories]);
+
+    const handleOpenInput = () => {
+        setIsCategoryInput((prev) => !prev);
+    };
 
     const handleRemove = (id: string) => {
         setNewData((prev) => [
@@ -38,6 +56,47 @@ export default function MultiSelect({
     const handleAdd = (id: string) => {
         onSelect(id, "add");
         setNewData((prev) => prev.filter((item) => item.id != id));
+    };
+
+    const handleChange = (e: any) => {
+        const newValue = e.target.value;
+
+        if (!/^[a-zA-Z]*$/.test(newValue)) {
+            setError("Only letters are allowed");
+            return;
+        }
+        setCategory(newValue);
+    };
+
+    const isFormValid = () => {
+        return category.trim() !== "";
+    };
+
+    const handleSubmit = async () => {
+        if (isFormValid()) {
+            await fetch(PATHS.API.PROXY.CATEGORY.POST, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                    "ngrok-skip-browser-warning": "69420",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    title: category,
+                    type: type,
+                    account_id: localStorage.getItem("activeAccount"),
+                }),
+            }).then((res) => {
+                if (res.status === 200) {
+                    refetch();
+                }
+                if (res.status === 400) {
+                    setError(MESSAGE.ERROR.EXISTS("Category"));
+                }
+            });
+        }
     };
 
     const toggleMasonry = () => {
@@ -85,18 +144,50 @@ export default function MultiSelect({
                     />
                 </fieldset>
                 {isSelectOpen && (
-                    <div className="absolute left-0 w-full bg-white py-2 flex flex-wrap gap-2 border border-gray-200 rounded-md shadow-md px-3">
-                        {newData.map((category) => (
-                            <span
-                                key={category.id}
-                                className="px-2 py-1 border border-authBlack rounded-lg cursor-pointer"
-                                onClick={() =>
-                                    handleAdd(category?.id?.toString() || "")
-                                }
-                            >
-                                {category.title}
-                            </span>
-                        ))}
+                    <div className="absolute left-0 w-full bg-white py-2 flex flex-col gap-2  border border-gray-200 rounded-md shadow-md px-3">
+                        <div className="w-full flex flex-wrap gap-2">
+                            {newData.map((category) => (
+                                <span
+                                    key={category.id}
+                                    className="px-2 py-1 border border-authBlack rounded-lg cursor-pointer"
+                                    onClick={() =>
+                                        handleAdd(
+                                            category?.id?.toString() || ""
+                                        )
+                                    }
+                                >
+                                    {category.title}
+                                </span>
+                            ))}
+                        </div>
+                        <div className="w-full flex flex-col gap-2">
+                            {isCategoryInput ? (
+                                <div className="flex items-center w-full gap-3">
+                                    <Input
+                                        type="text"
+                                        name="category"
+                                        value={category}
+                                        onChange={handleChange}
+                                        label="Category Name"
+                                        className="w-full"
+                                    />
+                                    <Button
+                                        onClick={handleSubmit}
+                                        text="Add"
+                                        className="mt-2"
+                                    />
+                                </div>
+                            ) : (
+                                <button onClick={handleOpenInput}>
+                                    Add Category
+                                </button>
+                            )}
+                            {error && (
+                                <span className="text-sm text-red-500">
+                                    {error}
+                                </span>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

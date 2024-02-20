@@ -13,6 +13,7 @@ import revalidate from "@/util/revalidate";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { Progress } from "./ui/progress";
 import Image from "next/image";
+import MESSAGE from "@/messages";
 
 const emptyPiggyBank = {
     goal: "",
@@ -97,11 +98,11 @@ function PiggyBankAdd() {
                     revalidate();
                     closeRef?.current?.click();
                     toast({
-                        description: "Piggy Bank has been created successfully",
+                        description: MESSAGE.SUCCESS.CREATION("Piggy Bank"),
                     });
                 }
                 if (res.status === 400) {
-                    setError("Insufficient Funds");
+                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
                 }
             });
         }
@@ -294,11 +295,11 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                     revalidate();
                     closeRef?.current?.click();
                     toast({
-                        description: "Money has been added to piggy bank",
+                        description: MESSAGE.SUCCESS.UPDATE("Piggy Bank"),
                     });
                 }
                 if (res.status === 400) {
-                    setError("Insufficient Funds");
+                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
                 }
             });
         }

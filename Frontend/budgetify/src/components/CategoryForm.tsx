@@ -8,6 +8,7 @@ import { useToast } from "./ui/use-toast";
 import { SheetClose, SheetFooter } from "./ui/sheet";
 import Button from "./partials/Button";
 import { CategoryType } from "@/type/CategoryType";
+import MESSAGE from "@/messages";
 
 export default function CategoryForm({
     type,
@@ -37,6 +38,11 @@ export default function CategoryForm({
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
     ) => {
         const { name, value } = e.target;
+
+        if (!/^[a-zA-Z]*$/.test(value)) {
+            setError(MESSAGE.ERROR.INVALID_CHARACTER);
+            return;
+        }
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
@@ -71,11 +77,11 @@ export default function CategoryForm({
                     refetch();
                     closeRef?.current?.click();
                     toast({
-                        description: "Category has been created successfully",
+                        description: MESSAGE.SUCCESS.CREATION("Category"),
                     });
                 }
                 if (res.status === 400) {
-                    setError("Category with such name already exists");
+                    setError(MESSAGE.ERROR.EXISTS("Category"));
                 }
             });
         }

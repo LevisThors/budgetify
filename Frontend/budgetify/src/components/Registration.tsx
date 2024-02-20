@@ -8,6 +8,7 @@ import { getCookie } from "cookies-next";
 import Link from "next/link";
 import revalidate from "@/util/revalidate";
 import PATHS from "@/paths";
+import MESSAGE from "@/messages";
 
 const registerFields = {
     email: "",
@@ -30,7 +31,7 @@ export default function Login() {
             if (!emailRegex.test(value)) {
                 setErrors((prev) => ({
                     ...prev,
-                    email: "Please enter a valid email address",
+                    email: MESSAGE.ERROR.INVALID_INPUT("email"),
                 }));
             } else {
                 setErrors((prev) => ({ ...prev, email: "" }));
@@ -82,7 +83,9 @@ export default function Login() {
                     .HOME
             );
         } else if (response.status === 401) {
-            setValidationError("Invalid email or password");
+            setValidationError(
+                MESSAGE.ERROR.INVALID_INPUT("email or password")
+            );
         }
     };
 

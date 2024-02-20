@@ -13,6 +13,7 @@ import PATHS from "@/paths";
 import { useRouter } from "next/navigation";
 import { DialogTrigger, Dialog } from "./ui/dialog";
 import DialogBody from "./partials/DialogBody";
+import MESSAGE from "@/messages";
 
 interface AccountFormProps {
     type: "view" | "edit" | "create";
@@ -49,6 +50,11 @@ export default function AccountForm({
 
         case "create":
             return <AccountCreateForm />;
+
+        default:
+            return (
+                <AccountViewForm account={account ? account : emptyAccount} />
+            );
     }
 }
 
@@ -99,6 +105,10 @@ function AccountEditForm({
         closeRef.current?.click();
     };
 
+    const typeSwitch = () => {
+        if (changeType) changeType("view");
+    };
+
     const isFormValid = () => {
         return formData.title.trim() !== "" && formData.currency.trim() !== "";
     };
@@ -128,12 +138,12 @@ function AccountEditForm({
                 revalidate(`/dashboard/${account.id}/transactions`);
                 if (changeType) changeType("view");
                 toast({
-                    description: "Account has been updated successfully",
+                    description: MESSAGE.SUCCESS.CREATION("Account"),
                 });
                 closeRef?.current?.click();
             }
             if (res.status === 400) {
-                setError("Account with such title already exists");
+                setError(MESSAGE.ERROR.EXISTS("Account"));
             }
         });
     };
@@ -174,12 +184,7 @@ function AccountEditForm({
             </div>
 
             <SheetFooter className="flex gap-4">
-                <SheetClose
-                    ref={closeRef}
-                    onClick={() => {
-                        if (changeType) changeType("view");
-                    }}
-                >
+                <SheetClose ref={closeRef} onClick={typeSwitch}>
                     Cancel
                 </SheetClose>
                 <Dialog>

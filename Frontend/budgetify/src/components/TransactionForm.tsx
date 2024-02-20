@@ -23,6 +23,7 @@ import {
 } from "./ui/dialog";
 import DocumentImage from "./partials/DocumentImage";
 import ActionButton from "./partials/ActionButton";
+import MESSAGE from "@/messages";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -63,6 +64,10 @@ export default function TransactionForm({
             );
         case "create":
             return <TransactionCreateForm type="create" />;
+        default:
+            return (
+                transaction && <TransactionViewForm transaction={transaction} />
+            );
     }
 }
 
@@ -186,6 +191,7 @@ function TransactionCreateForm({
     const [categories, setCategories] = useState<{
         [key: string]: CategoryType[];
     }>();
+    const [refetch, setRefetch] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const closeRef = useRef<HTMLButtonElement>(null);
     const { toast } = useToast();
@@ -206,7 +212,11 @@ function TransactionCreateForm({
         )
             .then((res) => res.json())
             .then((data) => setCategories(data));
-    }, []);
+    }, [refetch]);
+
+    const refetchCategories = () => {
+        setRefetch((prev) => !prev);
+    };
 
     const handleChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -307,12 +317,11 @@ function TransactionCreateForm({
                         if (changeActiveType) changeActiveType("view");
                     }
                     toast({
-                        description:
-                            "Transaction has been created successfully",
+                        description: MESSAGE.SUCCESS.CREATION("Transaction"),
                     });
                 }
                 if (res.status === 400) {
-                    setError("Insufficient Funds");
+                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
                 }
             });
         }
@@ -380,9 +389,11 @@ function TransactionCreateForm({
                     <MultiSelect
                         label="Categories"
                         categories={categories[formData.type]}
+                        refetch={refetchCategories}
                         selected={formData.categories}
                         onSelect={handleSelect}
                         required={true}
+                        type={formData.type}
                     />
                 )}
                 <Input

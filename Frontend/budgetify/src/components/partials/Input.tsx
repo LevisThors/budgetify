@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import MESSAGE from "@/messages";
 
 interface InputProps {
     value: string;
@@ -44,7 +45,7 @@ export default function Input({
     };
 
     return (
-        <div>
+        <div className="w-full">
             <fieldset
                 className={`${throwRequired ? "border-red-500" : ""} ${
                     disabled ? "opacity-50" : ""
@@ -84,7 +85,7 @@ export default function Input({
             </fieldset>
             <span className="text-red-500 text-sm">
                 {throwMaxLengthError
-                    ? "Maximum number of characters reached"
+                    ? MESSAGE.ERROR.MAX_LENGTH(maxLength)
                     : throwRequired && "Required field is empty"}{" "}
             </span>
         </div>
