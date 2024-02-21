@@ -14,7 +14,7 @@ class Obligatory extends Model
         'description',
         'amount',
         'payment_dates',
-        'user_id',
+        'account_id',
     ];
 
     public function account()

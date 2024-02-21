@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('accounts', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->decimal('balance', 8, 2);
             $table->enum("currency", ["USD", "EUR"]);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');

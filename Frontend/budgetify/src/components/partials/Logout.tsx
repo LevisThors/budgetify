@@ -1,5 +1,6 @@
 "use client";
 
+import PATHS from "@/paths";
 import { getCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 
@@ -8,15 +9,12 @@ export default function Logout() {
 
     const handleLogout = async () => {
         try {
-            await fetch(`/backend/sanctum/csrf-cookie`, {
+            await fetch(PATHS.API.PROXY.AUTH.GET_CSRF, {
                 method: "GET",
                 credentials: "include",
-                headers: {
-                    "ngrok-skip-browser-warning": "69420",
-                },
             });
 
-            const res = await fetch(`/backend/api/logout`, {
+            const res = await fetch(PATHS.API.PROXY.AUTH.LOGOUT, {
                 method: "POST",
                 headers: {
                     "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
@@ -26,7 +24,7 @@ export default function Logout() {
             });
 
             if (res.status === 200) {
-                router.push("/auth/login");
+                router.push(PATHS.AUTH.LOGIN);
             }
         } catch (error) {
             console.error("Error:", error);

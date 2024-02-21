@@ -14,7 +14,7 @@ class Subscription extends Model
         'description',
         'amount',
         'payment_date',
-        'user_id',
+        'account_id',
     ];
 
     public function account()

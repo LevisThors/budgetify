@@ -18,7 +18,7 @@ class Transaction extends Model implements HasMedia
         'amount',
         'payment_date',
         'payee',
-        'user_id',
+        'account_id',
     ];
 
     public function account()

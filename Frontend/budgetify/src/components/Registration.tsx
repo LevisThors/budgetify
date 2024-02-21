@@ -6,6 +6,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
+import revalidate from "@/util/revalidate";
+import PATHS from "@/paths";
+import MESSAGE from "@/messages";
 
 const registerFields = {
     email: "",
@@ -28,7 +31,7 @@ export default function Login() {
             if (!emailRegex.test(value)) {
                 setErrors((prev) => ({
                     ...prev,
-                    email: "Please enter a valid email address",
+                    email: MESSAGE.ERROR.INVALID_INPUT("email"),
                 }));
             } else {
                 setErrors((prev) => ({ ...prev, email: "" }));
@@ -48,14 +51,14 @@ export default function Login() {
 
         if (!isFormValid) return;
 
-        await fetch("/backend/sanctum/csrf-cookie", {
+        await fetch(PATHS.API.PROXY.AUTH.GET_CSRF, {
             headers: {
                 "ngrok-skip-browser-warning": "69420",
             },
             credentials: "include",
         });
 
-        const response = await fetch("/backend/api/register", {
+        const response = await fetch(PATHS.API.PROXY.AUTH.REGISTER, {
             credentials: "include",
             method: "POST",
             headers: {
@@ -74,14 +77,20 @@ export default function Login() {
         });
 
         if (response.status === 200) {
-            router.push("/dashboard/account/transactions");
+            revalidate();
+            router.push(
+                PATHS.PAGES(localStorage.getItem("activeAccount") || undefined)
+                    .HOME
+            );
         } else if (response.status === 401) {
-            setValidationError("Invalid email or password");
+            setValidationError(
+                MESSAGE.ERROR.INVALID_INPUT("email or password")
+            );
         }
     };
 
     return (
-        <div className="bg-white bg-opacity-80 z-10 rounded-md px-[80px] py-[70px] flex flex-col justify-center items-center w-fit">
+        <div className="bg-white bg-opacity-80 z-10 rounded-md px-[80px] py-[70px] flex flex-col justify-center items-center w-fit gap-9">
             <h1 className="text-4xl">Budgetify</h1>
             <div className="flex flex-col gap-[30px] opacity-100">
                 <div className="flex flex-col gap-1">
@@ -140,14 +149,14 @@ export default function Login() {
                         error={errors.confirmPassword}
                         handleChange={handleChange}
                     />
-                    <Link href="/auth/login" className="text-sm underline">
+                    <Link href={PATHS.AUTH.LOGIN} className="text-sm underline">
                         Already have an account?
                     </Link>
                 </div>
 
                 <Button
                     text="Register"
-                    active={isFormValid ? true : false}
+                    active={!!isFormValid}
                     onClick={handleSubmit}
                 />
             </div>

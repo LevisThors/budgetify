@@ -41,4 +41,9 @@ class Account extends Model
     {
         return $this->hasMany(PiggyBank::class);
     }
+
+    public function categories()
+    {
+        return $this->hasMany(Category::class);
+    }
 }

@@ -1,73 +1,42 @@
-"use client";
-
 import { AccountType } from "@/type/AccountType";
-import { getCookie } from "cookies-next";
-import { useEffect, useState } from "react";
-import { Sheet, SheetTrigger, SheetContent } from "./ui/sheet";
-import AccountCard from "./partials/AccountCard";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { cookies } from "next/headers";
+import { Suspense } from "react";
+import Account from "./Account";
+import PATHS from "@/paths";
+import { ScrollArea } from "./ui/scroll-area";
 
-export default function SideBar() {
-    const [accountData, setAccountData] = useState<AccountType[]>([]);
-    const [activeAccount, setActiveAccount] = useState<string | null>("");
-    const pathName = usePathname();
+const getAccounts = async () => {
+    const res = await fetch(PATHS.API.BASE.ACCOUNT.GET, {
+        headers: {
+            Cookie: `laravel_session=${
+                cookies().get("laravel_session")?.value
+            }`,
+            "X-XSRF-TOKEN": cookies().get("XSRF-TOKEN")?.value || "",
+            "ngrok-skip-browser-warning": "69420",
+        },
+        credentials: "include",
+    });
 
-    const handleClick = (id: string | number) => {
-        localStorage.setItem("activeAccount", id.toString());
-        setActiveAccount(id.toString());
-    };
+    return res.json();
+};
 
-    useEffect(() => {
-        const res = fetch(`/backend/api/accounts`, {
-            headers: {
-                Cookie: `laravel_session=${getCookie("laravel_session")}`,
-                "ngrok-skip-browser-warning": "69420",
-                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
-            },
-            credentials: "include",
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (localStorage.getItem("activeAccount") === null) {
-                    localStorage.setItem("activeAccount", data[0].id);
-                }
-                setAccountData(data);
-            });
-
-        setActiveAccount(localStorage.getItem("activeAccount"));
-    }, []);
+export default async function SideBar() {
+    const accountData = await getAccounts();
 
     return (
-        <ul className="flex flex-col gap-7">
-            {accountData.map((account: AccountType) => (
-                <Sheet key={account.id}>
-                    {activeAccount == account.id ? (
-                        <>
-                            <SheetTrigger>
-                                <AccountCard
-                                    account={account}
-                                    handleClick={handleClick}
-                                    activeAccount={activeAccount}
-                                />
-                            </SheetTrigger>
-                            <SheetContent></SheetContent>
-                        </>
-                    ) : (
-                        <Link
-                            href={`/dashboard/${account.id}/${
-                                pathName.split("/")[3]
-                            }`}
-                        >
-                            <AccountCard
-                                account={account}
-                                handleClick={handleClick}
-                                activeAccount={activeAccount}
-                            />
-                        </Link>
-                    )}
-                </Sheet>
-            ))}
-        </ul>
+        <ScrollArea>
+            <section className="flex flex-col gap-7 max-h-[90vh]">
+                {accountData.map((account: AccountType) => (
+                    <Suspense
+                        key={account.id}
+                        fallback={
+                            <div className="flex justify-between w-[400px] h-[185px] relative bg-gradient-linear rounded-xl p-5 cursor-pointer opacity-50"></div>
+                        }
+                    >
+                        <Account account={account} />
+                    </Suspense>
+                ))}
+            </section>
+        </ScrollArea>
     );
 }
