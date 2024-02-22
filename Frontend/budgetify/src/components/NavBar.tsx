@@ -1,11 +1,16 @@
 import Link from "next/link";
 import User from "./partials/User";
-import PATHS from "@/paths";
 import { headers } from "next/headers";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
+import ActivePath from "./partials/ActivePath";
+
+const Logo = dynamic(() => import("./partials/Logo"), { ssr: false });
 
 export default function NavBar() {
     const headersList = headers();
-    const accountId = headersList.get("referer")?.split("/")[4] || "account";
+    const accountId =
+        headersList.get("referer")?.split("?")[0].split("/")[4] || "account";
 
     const navLinks = {
         Categories: `/dashboard/categories`,
@@ -17,18 +22,18 @@ export default function NavBar() {
 
     return (
         <nav className="flex justify-between py-7 items-center">
-            <div>
-                <Link href={PATHS.PAGES(accountId).HOME}>Budgetify</Link>
-            </div>
+            <Suspense fallback={<span>Budgetify</span>}>
+                <Logo />
+            </Suspense>
             <div>
                 <ul className="flex gap-5 text-md">
                     {Object.entries(navLinks).map(([name, path]) => {
                         return (
-                            <li
-                                key={name}
-                                className="py-1 px-1 border-b border-b-transparent hover:border-b-black"
-                            >
+                            <li key={name} className="p-1">
                                 <Link href={path}>{name}</Link>
+                                <Suspense>
+                                    <ActivePath path={path} />
+                                </Suspense>
                             </li>
                         );
                     })}

@@ -13,6 +13,7 @@ export interface TransactionType {
     documents?: {
         path: string;
         name: string;
+        url: string;
     }[];
     [key: string]:
         | string
@@ -21,6 +22,6 @@ export interface TransactionType {
         | CategoryType[]
         | File[]
         | Date
-        | { path: string; name: string }[]
+        | { path: string; name: string; url: string }[]
         | undefined;
 }

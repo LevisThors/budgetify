@@ -16,6 +16,8 @@ const PATHS = {
                     `/backend/api/transactions/${transactionId}`,
                 DELETE: (transactionId: string | number) =>
                     `/backend/api/transactions/${transactionId}`,
+                DOWNLOAD: (path: string) =>
+                    `/backend/api/transactions/download/${path}`,
             },
             CATEGORY: {
                 GET: "/backend/api/categories",

@@ -24,6 +24,8 @@ import {
 import DocumentImage from "./partials/DocumentImage";
 import ActionButton from "./partials/ActionButton";
 import MESSAGE from "@/messages";
+import DialogBody from "./partials/DialogBody";
+import Link from "next/link";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -76,9 +78,14 @@ function TransactionViewForm({
 }: {
     transaction: TransactionType;
 }) {
-    const [isDocumentOpen, setIsDocumentOpen] = useState(false);
+    const [isDocumentOpen, setIsDocumentOpen] = useState("");
+
+    const handleOpenDocument = (path: string) => {
+        setIsDocumentOpen(path);
+    };
+
     const handleCloseDocument = () => {
-        setIsDocumentOpen((prev) => !prev);
+        setIsDocumentOpen("");
     };
 
     return (
@@ -131,11 +138,13 @@ function TransactionViewForm({
             </div>
             <div>
                 {transaction.documents?.map(
-                    (document: { path: string; name: string }) => (
-                        <div key={document.path}>
+                    (document: { path: string; name: string; url: string }) => (
+                        <div key={document.url}>
                             <div
-                                className="flex items-center justify-between w-full border-b py-1.5 border-authBlack last:border-none"
-                                onClick={handleCloseDocument}
+                                className="flex items-center justify-between w-full border-b py-1.5 border-authBlack cursor-pointer"
+                                onClick={() =>
+                                    handleOpenDocument(document.path)
+                                }
                             >
                                 <div className="flex items-center">
                                     <Image
@@ -149,7 +158,20 @@ function TransactionViewForm({
                                     </span>
                                 </div>
                                 <div className="h-[50px]">
-                                    <button className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5">
+                                    <Link
+                                        href={PATHS.API.PROXY.TRANSACTION.DOWNLOAD(
+                                            document.path
+                                                .split("/")
+                                                .join("-s-")
+                                                .split("\\")
+                                                .join("-s-")
+                                        )}
+                                        download={document.name}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                        }}
+                                        className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5"
+                                    >
                                         <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
                                             <Image
                                                 src="/icons/download.svg"
@@ -159,12 +181,12 @@ function TransactionViewForm({
                                             />
                                         </span>
                                         Download
-                                    </button>
+                                    </Link>
                                 </div>
                             </div>
-                            {isDocumentOpen && (
+                            {isDocumentOpen === document.path && (
                                 <DocumentImage
-                                    imagePath={document.path}
+                                    imagePath={document.url}
                                     closeDocument={handleCloseDocument}
                                 />
                             )}
@@ -259,6 +281,10 @@ function TransactionCreateForm({
                 ),
             }));
         }
+    };
+
+    const handleInactive = () => {
+        setError(MESSAGE.ERROR.FILL_REQUIRED);
     };
 
     const isFormValid = () => {
@@ -435,37 +461,15 @@ function TransactionCreateForm({
                     <DialogTrigger asChild>
                         <button>Cancel</button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <div className="flex justify-between">
-                                <span>This transaction will not be saved</span>
-                                <div>
-                                    <Image
-                                        src="/icons/close.svg"
-                                        width={35}
-                                        height={35}
-                                        alt="close popup"
-                                    />
-                                </div>
-                            </div>
-                        </DialogHeader>
-                        <div className="flex items-center space-x-2">
-                            <p>Are you sure you want to cancel?</p>
-                        </div>
-                        <DialogFooter className="flex justify-end items-center">
-                            <DialogClose asChild>
-                                <span onClick={() => closeRef.current?.click()}>
-                                    Yes
-                                </span>
-                            </DialogClose>
-                            <DialogClose asChild>
-                                <Button text="No" onClick={() => {}} />
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
+                    <DialogBody
+                        header="Cancel Transaction"
+                        body={MESSAGE.WARNING.CANCEL("transaction")}
+                        onYes={() => closeRef.current?.click()}
+                    />
                 </Dialog>
                 <Button
                     onClick={handleSubmit}
+                    onInactiveClick={handleInactive}
                     text="Save"
                     className="text-red px-5"
                     active={isFormValid()}

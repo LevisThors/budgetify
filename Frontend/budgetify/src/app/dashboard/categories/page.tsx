@@ -18,6 +18,9 @@ import {
 } from "@/components/ui/sheet";
 import CategoryForm from "@/components/CategoryForm";
 import { toast } from "@/components/ui/use-toast";
+import MESSAGE from "@/messages";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import DialogBody from "@/components/partials/DialogBody";
 
 export default function CategoriesPage() {
     const [categories, setCategories] = useState<CategoryType[]>();
@@ -69,7 +72,7 @@ export default function CategoriesPage() {
             if (res.status === 200) {
                 refetchData();
                 toast({
-                    description: "Account has been deleted",
+                    description: MESSAGE.SUCCESS.DELETE("Category"),
                     variant: "destructive",
                 });
             }
@@ -87,6 +90,11 @@ export default function CategoriesPage() {
                     <SearchBar />
                 </div>
                 <div className="w-full flex flex-wrap gap-5">
+                    {categories?.length === 0 && (
+                        <div className="w-full flex justify-center">
+                            <span>{MESSAGE.ERROR.NOT_FOUND("Categories")}</span>
+                        </div>
+                    )}
                     {categories?.map((category) => {
                         return (
                             <div
@@ -134,17 +142,27 @@ export default function CategoriesPage() {
                                             </SheetContent>
                                         </Sheet>
                                     </span>
-                                    <span>
-                                        <Image
-                                            src="/icons/delete.svg"
-                                            alt="delete transaction"
-                                            onClick={() =>
+                                    <Dialog>
+                                        <DialogTrigger asChild>
+                                            <button>
+                                                <Image
+                                                    src="/icons/delete.svg"
+                                                    alt="delete Category"
+                                                    width={20}
+                                                    height={20}
+                                                />
+                                            </button>
+                                        </DialogTrigger>
+                                        <DialogBody
+                                            header="Delete Category"
+                                            body={MESSAGE.WARNING.DELETE(
+                                                "Category"
+                                            )}
+                                            onYes={() =>
                                                 handleDelete(category.id || "")
                                             }
-                                            width={20}
-                                            height={20}
                                         />
-                                    </span>
+                                    </Dialog>
                                 </div>
                             </div>
                         );
@@ -160,7 +178,9 @@ export default function CategoriesPage() {
                     </SheetTrigger>
                     <SheetContent>
                         <SheetHeader className="flex flex-row justify-between items-center">
-                            <h1 className="text-2xl">Add Category</h1>
+                            <h1 className="text-2xl">
+                                {MESSAGE.BUTTON.ADD("Category")}
+                            </h1>
                             <div>
                                 <SheetClose>
                                     <Image

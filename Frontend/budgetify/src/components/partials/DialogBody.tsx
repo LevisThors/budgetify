@@ -44,7 +44,11 @@ export default function DialogBody({
                     </button>
                 </DialogClose>
                 <DialogClose asChild>
-                    <Button text="No" onClick={onNo || undefined} />
+                    <Button
+                        text="No"
+                        onClick={onNo || undefined}
+                        className="opacity-60 hover:opacity-100 transition-all cursor-pointer"
+                    />
                 </DialogClose>
             </DialogFooter>
         </DialogContent>

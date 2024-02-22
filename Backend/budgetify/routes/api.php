@@ -41,6 +41,7 @@ Route::middleware("web")->group(function () {
         Route::put('/transactions/{id}', [TransactionController::class, 'update']);
         Route::delete('/transactions/{id}', [TransactionController::class, 'delete']);
         Route::post('/transactions', [TransactionController::class, 'store']);
+        Route::get('/transactions/download/{path?}', [TransactionController::class, 'downloadDocument']);
 
         Route::get('/subscription', [SubscriptionController::class, 'getAll']);
         Route::post('/subscription', [SubscriptionController::class, 'store']);

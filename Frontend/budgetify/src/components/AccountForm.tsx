@@ -260,7 +260,7 @@ export function AccountCreateForm() {
                     data.createdAccount.currency
                 );
                 router.replace(PATHS.PAGES(data.createdAccount.id).HOME);
-                revalidate();
+                await revalidate();
                 closeRef?.current?.click();
                 toast({
                     description: "Account has been created successfully",

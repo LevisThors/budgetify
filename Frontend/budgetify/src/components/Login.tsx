@@ -71,7 +71,7 @@ export default function Login() {
         });
 
         if (response.status === 200) {
-            revalidate();
+            await revalidate();
             router.push(
                 PATHS.PAGES(localStorage.getItem("activeAccount") || "").HOME
             );

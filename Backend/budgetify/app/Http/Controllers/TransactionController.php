@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
@@ -47,7 +48,8 @@ class TransactionController extends Controller
             $transactions = $query->get()->map(function ($transaction) {
                 $transaction->documents = $transaction->getMedia()->map(function ($media) {
                     return [
-                        'path' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
+                        'url' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
+                        'path' => $media->getPath(),
                         'name' => $media->name,
                     ];
                 });
@@ -58,8 +60,6 @@ class TransactionController extends Controller
             if ($transactions->count() == 0) {
                 return response()->json(['message' => 'Empty account'], 200);
             }
-
-            Log::info($transactions[0]->documents);
 
             return response()->json(
                 [
@@ -212,5 +212,14 @@ class TransactionController extends Controller
                 return response()->json(['message' => 'Error occurred while creating transaction: ' . $e->getMessage()], 500);
             }
         }
+    }
+
+    public function downloadDocument($path)
+    {
+        $path = str_replace('-s-', '/', $path);
+        // $path = explode('/storage', $path)[1];
+
+        Log::info($path);
+        return response()->download($path);
     }
 }
