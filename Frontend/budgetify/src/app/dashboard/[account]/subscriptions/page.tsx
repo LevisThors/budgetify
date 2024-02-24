@@ -10,18 +10,18 @@ import {
     SheetClose,
 } from "@/components/ui/sheet";
 import Image from "next/image";
-import AccountForm from "@/components/AccountForm";
 import { Suspense } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PATHS from "@/paths";
-import PiggyBank from "@/components/PiggyBank";
-import FilterButton from "@/components/partials/FilterButton";
 import SearchBar from "@/components/partials/SearchBar";
 import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import SubscriptionForm from "@/components/SubscriptionsForm";
+import MESSAGE from "@/messages";
+import { SubscriptionType } from "@/type/SubscriptionType";
 
-interface TransactionsPageProps {
+interface SubscriptionsPageProps {
     params: {
         account: string;
     };
@@ -32,12 +32,12 @@ interface TransactionsPageProps {
     };
 }
 
-async function getTransactions(
+async function getSubscriptions(
     accountId: string,
     searchParams: { query?: string; type?: string; sort?: string } | null
 ) {
     const response = await fetch(
-        `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
+        `${PATHS.API.BASE.SUBSCRIPTION.GET}?account_id=${accountId}${
             searchParams?.query ? `&query=${searchParams.query}` : ""
         }${searchParams?.type ? `&type=${searchParams.type}` : ""}${
             searchParams?.sort ? `&sort=${searchParams.sort}` : ""
@@ -78,8 +78,8 @@ const getCategories = async (accountId: string) => {
 export default async function SubscriptionsPage({
     params,
     searchParams,
-}: TransactionsPageProps) {
-    const transactionsData = await getTransactions(
+}: SubscriptionsPageProps) {
+    const subscriptionsData = await getSubscriptions(
         params?.account,
         searchParams || null
     );
@@ -98,21 +98,22 @@ export default async function SubscriptionsPage({
                 <Suspense>
                     <ScrollArea>
                         <div className="max-h-[75vh] flex flex-col gap-5">
-                            {transactionsData?.message !== "Empty account" ? (
-                                transactionsData?.transactions?.map(
-                                    (transaction: TransactionType) => (
+                            {subscriptionsData?.message !== "Empty account" ? (
+                                subscriptionsData?.subscriptions?.map(
+                                    (subscription: SubscriptionType) => (
                                         <Card
-                                            key={transaction.id}
-                                            transaction={transaction}
+                                            key={subscription.id}
+                                            transaction={subscription}
+                                            page="subscriptions"
                                             currency={currencyToSymbol(
-                                                transactionsData.currency
+                                                subscriptionsData.currency
                                             )}
                                         />
                                     )
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    You don&apos;t have transactions
+                                    {MESSAGE.ERROR.NOT_FOUND("Subscriptions")}
                                 </span>
                             )}
                         </div>
@@ -121,18 +122,18 @@ export default async function SubscriptionsPage({
             </div>
             <div className="w-1/3 flex flex-col justify-between h-full gap-4">
                 <div className="flex flex-col gap-4">
-                    <Suspense>
-                        <FilterButton type="Income" />
-                        <FilterButton type="Expenses" />
-                    </Suspense>
                     <Suspense fallback="loading">
                         <Sheet>
                             <SheetTrigger>
-                                <ActionButton text="Add Account" />
+                                <ActionButton
+                                    text={MESSAGE.BUTTON.ADD("Subscription")}
+                                />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
-                                    <h1 className="text-2xl">Add Account</h1>
+                                    <h1 className="text-2xl">
+                                        {MESSAGE.BUTTON.ADD("Subscription")}
+                                    </h1>
                                     <div>
                                         <SheetClose>
                                             <Image
@@ -144,14 +145,14 @@ export default async function SubscriptionsPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <AccountForm type="create" />
+                                <SubscriptionForm type="create" />
                             </SheetContent>
                         </Sheet>
                         <Sheet>
                             {hasCategories && (
                                 <SheetTrigger>
                                     <ActionButton
-                                        text="Add Transaction"
+                                        text={MESSAGE.BUTTON.ADD("Transaction")}
                                         needsAccount={true}
                                     />
                                 </SheetTrigger>
@@ -159,7 +160,7 @@ export default async function SubscriptionsPage({
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">
-                                        Add Transaction
+                                        {MESSAGE.BUTTON.ADD("Transaction")}
                                     </h1>
                                     <div>
                                         <SheetClose>
@@ -176,9 +177,6 @@ export default async function SubscriptionsPage({
                             </SheetContent>
                         </Sheet>
                     </Suspense>
-                </div>
-                <div>
-                    <PiggyBank accountId={params.account} />
                 </div>
             </div>
         </section>

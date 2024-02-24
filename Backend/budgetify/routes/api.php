@@ -43,8 +43,10 @@ Route::middleware("web")->group(function () {
         Route::post('/transactions', [TransactionController::class, 'store']);
         Route::get('/transactions/download/{path?}', [TransactionController::class, 'downloadDocument']);
 
-        Route::get('/subscription', [SubscriptionController::class, 'getAll']);
-        Route::post('/subscription', [SubscriptionController::class, 'store']);
+        Route::get('/subscriptions', [SubscriptionController::class, 'getAll']);
+        Route::put('/subscriptions/{id}', [SubscriptionController::class, 'update']);
+        Route::delete('/subscriptions/{id}', [SubscriptionController::class, 'delete']);
+        Route::post('/subscriptions', [SubscriptionController::class, 'store']);
 
         Route::get('/accounts', [AccountController::class, 'getAll']);
         Route::put('/accounts/{id}', [AccountController::class, 'update']);

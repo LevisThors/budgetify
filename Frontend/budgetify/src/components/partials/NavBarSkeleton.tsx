@@ -1,15 +1,13 @@
-"use client";
-
 import Link from "next/link";
-import User from "./partials/User";
-import { Suspense, useEffect, useState } from "react";
-import ActivePath from "./partials/ActivePath";
-import dynamic from "next/dynamic";
+import User from "./User";
+import { headers } from "next/headers";
+import { Suspense } from "react";
+import ActivePath from "./ActivePath";
 
-const Logo = dynamic(() => import("./partials/Logo"), { ssr: false });
-
-export default function NavBar() {
-    const accountId = localStorage.getItem("activeAccount") || "account";
+export default function NavBarSkeleton() {
+    const headersList = headers();
+    const accountId =
+        headersList.get("referer")?.split("?")[0].split("/")[4] || "account";
 
     const navLinks = {
         Categories: `/dashboard/categories`,
@@ -21,9 +19,7 @@ export default function NavBar() {
 
     return (
         <nav className="flex justify-between py-7 items-center">
-            <Suspense fallback={<span>Budgetify</span>}>
-                <Logo />
-            </Suspense>
+            <Link href={"#"}>Budgetify</Link>
             <div>
                 <ul className="flex gap-5 text-md">
                     {Object.entries(navLinks).map(([name, path]) => {

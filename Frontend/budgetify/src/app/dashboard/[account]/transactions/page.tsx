@@ -20,6 +20,7 @@ import SearchBar from "@/components/partials/SearchBar";
 import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import MESSAGE from "@/messages";
 
 interface TransactionsPageProps {
     params: {
@@ -107,12 +108,13 @@ export default async function TransactionsPage({
                                             currency={currencyToSymbol(
                                                 transactionsData.currency
                                             )}
+                                            page="transactions"
                                         />
                                     )
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    You don&apos;t have transactions
+                                    {MESSAGE.ERROR.NOT_FOUND("Transactions")}
                                 </span>
                             )}
                         </div>

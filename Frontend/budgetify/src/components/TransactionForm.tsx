@@ -319,6 +319,10 @@ function TransactionCreateForm({
                 localStorage.getItem("activeAccount") || ""
             );
 
+            if (type === "edit") {
+                data.append("_method", "PUT");
+            }
+
             await fetch(
                 type === "edit"
                     ? PATHS.API.PROXY.TRANSACTION.PUT(transaction?.id || "")

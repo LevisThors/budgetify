@@ -13,7 +13,8 @@ class Subscription extends Model
         'title',
         'description',
         'amount',
-        'payment_date',
+        'first_payment_date',
+        'second_payment_date',
         'account_id',
     ];
 

@@ -1,4 +1,11 @@
-import NavBar from "@/components/NavBar";
+import NavBarSkeleton from "@/components/partials/NavBarSkeleton";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+const NavBar = dynamic(() => import("@/components/NavBar"), {
+    ssr: false,
+    loading: () => <NavBarSkeleton />,
+});
 
 export default function DashboardLayout({
     children,
@@ -8,7 +15,9 @@ export default function DashboardLayout({
     return (
         <>
             <header className="px-10">
-                <NavBar />
+                <Suspense>
+                    <NavBar />
+                </Suspense>
             </header>
             <main className="px-10">{children}</main>
         </>

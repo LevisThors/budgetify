@@ -84,23 +84,36 @@ class TransactionController extends Controller
                 return response()->json(['message' => 'Transaction not found'], 404);
             }
 
+            $account = Auth::user()->accounts->find($request->account_id);
+            $originalBalance = $transaction->type === "Expenses"
+                ? $account->balance + $transaction->amount
+                : $account->balance - $transaction->amount;
+
+            $account->balance = $request->type === 'Expenses'
+                ? $originalBalance - $request->amount
+                : $originalBalance + $request->amount;
+
+            if ($account->balance < 0) {
+                DB::rollBack();
+                return response()->json(['message' => 'Insufficient funds'], 400);
+            }
+
             $transaction->update([
                 'title' => $request['title'],
                 'description' => $request['description'],
                 'type' => $request['type'],
                 'amount' => $request['amount'],
                 'payment_date' => $request['payment_date'],
-                'payee' => $request['payee'] ? $request['payee']
-                    : Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                'account_id' => $request->account_id,
+                'payee' => $request['payee'],
+                'account_id' => $request['account_id'],
             ]);
 
             if (isset($request['categories'])) {
-                $userCategories = Auth::user()->categories->pluck('id')->toArray();
+                $accountCategories = Auth::user()->accounts->find($request['account_id'])->categories->pluck('id')->toArray();
 
-                if (array_diff($request['categories'], $userCategories)) {
+                if (array_diff($request['categories'], $accountCategories)) {
                     DB::rollBack();
-                    return response()->json(['message' => 'Some categories do not belong to the user'], 400);
+                    return response()->json(['message' => 'Some categories do not belong to this account'], 400);
                 }
 
                 $transaction->categories()->sync($request['categories']);
@@ -112,16 +125,6 @@ class TransactionController extends Controller
                         ->addMedia($file)
                         ->toMediaCollection();
                 }
-            }
-
-            $account = Auth::user()->accounts->find($request->account_id);
-            $account->balance = $request->type === 'Expenses'
-                ? $account->balance - $request->amount
-                : $account->balance + $request->amount;
-
-            if ($account->balance < 0) {
-                DB::rollBack();
-                return response()->json(['message' => 'Insufficient funds'], 400);
             }
 
             $account->save();

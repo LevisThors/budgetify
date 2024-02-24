@@ -19,6 +19,14 @@ const PATHS = {
                 DOWNLOAD: (path: string) =>
                     `/backend/api/transactions/download/${path}`,
             },
+            SUBSCIRPTION: {
+                GET: "/backend/api/subscriptions",
+                POST: "/backend/api/subscriptions",
+                PUT: (subscriptionId: string | number) =>
+                    `/backend/api/subscriptions/${subscriptionId}`,
+                DELETE: (subscriptionId: string | number) =>
+                    `/backend/api/subscriptions/${subscriptionId}`,
+            },
             CATEGORY: {
                 GET: "/backend/api/categories",
                 POST: "/backend/api/categories",
@@ -51,6 +59,9 @@ const PATHS = {
                 FORGOT_PASSWORD: "/backend/api/auth/forgot-password",
                 RESET_PASSWORD: "/backend/api/auth/reset-password",
             },
+            USER: {
+                GET: "/backend/api/user",
+            },
         },
         BASE: {
             USER: {
@@ -61,6 +72,9 @@ const PATHS = {
             },
             TRANSACTION: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`,
+            },
+            SUBSCRIPTION: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/subscriptions`,
             },
             CATEGORY: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`,
