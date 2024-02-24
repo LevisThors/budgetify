@@ -1,6 +1,6 @@
 import Registration from "@/components/Registration";
 import { Suspense } from "react";
-import { getUserData } from "@/components/partials/User";
+import { getUserData } from "@/util/getUserData";
 import { redirect } from "next/navigation";
 import PATHS from "@/paths";
 

@@ -1,4 +1,4 @@
-import { getUserData } from "@/components/partials/User";
+import { getUserData } from "@/util/getUserData";
 import PATHS from "@/paths";
 import { redirect } from "next/navigation";
 
