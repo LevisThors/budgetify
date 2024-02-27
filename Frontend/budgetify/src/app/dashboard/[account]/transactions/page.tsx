@@ -21,6 +21,7 @@ import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import MESSAGE from "@/messages";
+import { LoadingProvider } from "@/context/Loading";
 
 interface TransactionsPageProps {
     params: {
@@ -96,20 +97,21 @@ export default async function TransactionsPage({
                     <SearchBar />
                 </Suspense>
                 <SortBy />
-                <Suspense>
+                <Suspense fallback="LOADINGGG">
                     <ScrollArea>
                         <div className="max-h-[75vh] flex flex-col gap-5">
                             {transactionsData?.message !== "Empty account" ? (
                                 transactionsData?.transactions?.map(
                                     (transaction: TransactionType) => (
-                                        <Card
-                                            key={transaction.id}
-                                            transaction={transaction}
-                                            currency={currencyToSymbol(
-                                                transactionsData.currency
-                                            )}
-                                            page="transactions"
-                                        />
+                                        <LoadingProvider key={transaction.id}>
+                                            <Card
+                                                transaction={transaction}
+                                                currency={currencyToSymbol(
+                                                    transactionsData.currency
+                                                )}
+                                                page="transactions"
+                                            />
+                                        </LoadingProvider>
                                     )
                                 )
                             ) : (
@@ -130,11 +132,15 @@ export default async function TransactionsPage({
                     <Suspense fallback="loading">
                         <Sheet>
                             <SheetTrigger>
-                                <ActionButton text="Add Account" />
+                                <ActionButton
+                                    text={MESSAGE.BUTTON.ADD("Account")}
+                                />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
-                                    <h1 className="text-2xl">Add Account</h1>
+                                    <h1 className="text-2xl">
+                                        {MESSAGE.BUTTON.ADD("Account")}
+                                    </h1>
                                     <div>
                                         <SheetClose>
                                             <Image
@@ -153,7 +159,7 @@ export default async function TransactionsPage({
                             {hasCategories && (
                                 <SheetTrigger>
                                     <ActionButton
-                                        text="Add Transaction"
+                                        text={MESSAGE.BUTTON.ADD("Transaction")}
                                         needsAccount={true}
                                     />
                                 </SheetTrigger>
@@ -161,7 +167,7 @@ export default async function TransactionsPage({
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">
-                                        Add Transaction
+                                        {MESSAGE.BUTTON.ADD("Transaction")}
                                     </h1>
                                     <div>
                                         <SheetClose>

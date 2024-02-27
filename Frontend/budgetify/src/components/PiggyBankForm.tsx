@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "./ui/use-toast";
+import { toast, useToast } from "./ui/use-toast";
 import { PiggyBankType } from "@/type/PiggyBankType";
 import Button from "./partials/Button";
 import Input from "./partials/Input";
@@ -14,6 +14,10 @@ import currencyToSymbol from "@/util/currencyToSymbol";
 import { Progress } from "./ui/progress";
 import Image from "next/image";
 import MESSAGE from "@/messages";
+import { DatePicker } from "./partials/DatePicker";
+import { format } from "date-fns";
+import { Dialog, DialogTrigger } from "./ui/dialog";
+import DialogBody from "./partials/DialogBody";
 
 const emptyPiggyBank = {
     goal: "",
@@ -37,9 +41,15 @@ export default function PiggyBankForm({
 
     switch (activeType) {
         case "add":
-            return <PiggyBankAdd />;
+            return <PiggyBankAdd type="add" />;
         case "edit":
-            return <div>edit</div>;
+            return (
+                <PiggyBankAdd
+                    type="edit"
+                    piggyBank={piggyBank}
+                    changeActiveType={handleChangeType}
+                />
+            );
         case "view":
             if (piggyBank)
                 return (
@@ -50,11 +60,27 @@ export default function PiggyBankForm({
                 );
         case "addMoney":
             if (piggyBank) return <PiggyBankAddMoney piggyBank={piggyBank} />;
+        default:
+            if (piggyBank)
+                return (
+                    <PiggyBankView
+                        piggyBank={piggyBank}
+                        onTypeChange={handleChangeType}
+                    />
+                );
     }
 }
 
-function PiggyBankAdd() {
-    const [formData, setFormData] = useState(emptyPiggyBank);
+function PiggyBankAdd({
+    type,
+    piggyBank,
+    changeActiveType,
+}: {
+    type: string;
+    piggyBank?: PiggyBankType;
+    changeActiveType?: (type: string) => void;
+}) {
+    const [formData, setFormData] = useState(piggyBank || emptyPiggyBank);
     const [error, setError] = useState<string>("");
     const router = useRouter();
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -68,7 +94,7 @@ function PiggyBankAdd() {
     };
 
     const isFormValid = () => {
-        return formData.goal.trim() !== "" && formData.date.toString() !== "";
+        return formData.goal.trim() !== "" && formData.goal_amount != 0;
     };
 
     const handleSubmit = async () => {
@@ -76,7 +102,7 @@ function PiggyBankAdd() {
             const data = new FormData();
 
             Object.entries(formData).forEach(([key, value]) => {
-                data.append(key, value.toString());
+                if (value) data.append(key, value.toString());
             });
 
             data.append(
@@ -84,22 +110,40 @@ function PiggyBankAdd() {
                 localStorage.getItem("activeAccount") || ""
             );
 
-            const response = await fetch(PATHS.API.PROXY.PIGGY_BANK.POST, {
-                method: "POST",
-                headers: {
-                    Cookie: `laravel_session=${getCookie("laravel_session")}`,
-                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
-                    "ngrok-skip-browser-warning": "69420",
-                },
-                credentials: "include",
-                body: data,
-            }).then((res) => {
+            if (type === "edit") {
+                data.append("_method", "PUT");
+            }
+
+            const response = await fetch(
+                type === "edit"
+                    ? PATHS.API.PROXY.PIGGY_BANK.PUT(piggyBank?.id || "")
+                    : PATHS.API.PROXY.PIGGY_BANK.POST,
+                {
+                    method: "POST",
+                    headers: {
+                        Cookie: `laravel_session=${getCookie(
+                            "laravel_session"
+                        )}`,
+                        "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                        "ngrok-skip-browser-warning": "69420",
+                    },
+                    credentials: "include",
+                    body: data,
+                }
+            ).then((res) => {
                 if (res.status === 200) {
                     revalidate();
                     closeRef?.current?.click();
-                    toast({
-                        description: MESSAGE.SUCCESS.CREATION("Piggy Bank"),
-                    });
+                    if (type === "edit") {
+                        if (changeActiveType) changeActiveType("view");
+                        toast({
+                            description: MESSAGE.SUCCESS.UPDATE("Piggy Bank"),
+                        });
+                    } else {
+                        toast({
+                            description: MESSAGE.SUCCESS.CREATION("Piggy Bank"),
+                        });
+                    }
                 }
                 if (res.status === 400) {
                     setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
@@ -111,7 +155,7 @@ function PiggyBankAdd() {
     return (
         <>
             <SheetHeader className="flex flex-row justify-between items-center">
-                <h1 className="text-2xl">Add Piggy Bank</h1>
+                <h1 className="text-2xl">{MESSAGE.BUTTON.ADD("Piggy Bank")}</h1>
                 <div>
                     <SheetClose>
                         <Image
@@ -149,14 +193,6 @@ function PiggyBankAdd() {
                         onChange={handleChange}
                         required={true}
                     />
-                    <Input
-                        label="Date"
-                        name="date"
-                        type="date"
-                        value={formData.date.toString()}
-                        onChange={handleChange}
-                        required={true}
-                    />
                 </div>
                 <SheetFooter className="flex gap-4">
                     <SheetClose ref={closeRef}>Cancel</SheetClose>
@@ -179,10 +215,35 @@ function PiggyBankView({
     piggyBank: PiggyBankType;
     onTypeChange: (type: string) => void;
 }) {
+    const closeRef = useRef<HTMLButtonElement>(null);
+
+    const handleCrash = async () => {
+        await fetch(PATHS.API.PROXY.PIGGY_BANK.CRASH(piggyBank.id || ""), {
+            method: "POST",
+            headers: {
+                Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+        }).then((res) => {
+            if (res.status === 200) {
+                revalidate();
+                closeRef?.current?.click();
+                toast({
+                    description: MESSAGE.SUCCESS.CRASH("Piggy Bank"),
+                });
+            }
+        });
+    };
+
     return (
         <>
             <SheetHeader className="flex flex-row justify-between items-center">
-                <h1 className="text-2xl">Piggy Bank Information</h1>
+                <h1 className="text-2xl">
+                    {MESSAGE.HEADER.INFORMATION("Piggy Bank")}
+                </h1>
                 <div>
                     <button onClick={() => onTypeChange("edit")}>
                         <Image
@@ -200,7 +261,7 @@ function PiggyBankView({
                             height={32}
                         />
                     </button>
-                    <SheetClose>
+                    <SheetClose ref={closeRef}>
                         <Image
                             src="/icons/close.svg"
                             alt="close"
@@ -213,7 +274,7 @@ function PiggyBankView({
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col justify-between gap-1">
                     <span className="text-lg">
-                        {piggyBank.goal_amount} / {piggyBank.saved_amount}{" "}
+                        {piggyBank.saved_amount} / {piggyBank.goal_amount}{" "}
                         {currencyToSymbol(piggyBank.currency || "")}
                     </span>
                     <Progress
@@ -244,20 +305,34 @@ function PiggyBankView({
                         </span>
                     </div>
                 </div>
-                <button>Crash</button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <button>Crash</button>
+                    </DialogTrigger>
+                    <DialogBody
+                        header="Delete Account"
+                        body={MESSAGE.WARNING.DELETE("Account")}
+                        onYes={() => handleCrash()}
+                    />
+                </Dialog>
             </div>
         </>
     );
 }
 
 function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<{
+        amountToSave: number;
+        date: Date | string | undefined;
+    }>({
         amountToSave: 0,
-        date: new Date().toISOString().split("T")[0],
+        date: undefined,
     });
     const [error, setError] = useState<string>("");
     const router = useRouter();
     const closeRef = useRef<HTMLButtonElement>(null);
+    const prevDateRef = useRef<Date | undefined>();
+
     const { toast } = useToast();
 
     const handleChange = (
@@ -267,30 +342,36 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleDateChange = (date: Date | undefined) => {
+        if (date && (!prevDateRef.current || date !== prevDateRef.current)) {
+            setFormData((prev) => ({
+                ...prev,
+                date: format(date || new Date(), "yyyy-MM-dd"),
+            }));
+        }
+
+        prevDateRef.current = date;
+    };
+
     const isFormValid = () => {
         return formData.amountToSave !== 0 && formData.date !== "";
     };
 
     const handleSubmit = async () => {
         if (isFormValid()) {
-            const response = await fetch(
-                PATHS.API.PROXY.PIGGY_BANK.PUT(piggyBank.id || ""),
-                {
-                    method: "PUT",
-                    headers: {
-                        Cookie: `laravel_session=${getCookie(
-                            "laravel_session"
-                        )}`,
-                        "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
-                        "ngrok-skip-browser-warning": "69420",
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        amountToSave: formData.amountToSave,
-                    }),
-                }
-            ).then((res) => {
+            await fetch(PATHS.API.PROXY.PIGGY_BANK.PUT(piggyBank.id || ""), {
+                method: "PUT",
+                headers: {
+                    Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                    "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                    "ngrok-skip-browser-warning": "69420",
+                    "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                    amountToSave: formData.amountToSave,
+                }),
+            }).then((res) => {
                 if (res.status === 200) {
                     revalidate();
                     closeRef?.current?.click();
@@ -329,13 +410,9 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                 onChange={handleChange}
                 required={true}
             />
-            <Input
-                label="Date"
-                name="date"
-                type="date"
-                value={formData.date.toString()}
-                onChange={handleChange}
-                required={true}
+            <DatePicker
+                onDateChange={handleDateChange}
+                originalDate={formData.date as Date}
             />
             <SheetFooter className="flex gap-4">
                 <SheetClose ref={closeRef}>Cancel</SheetClose>

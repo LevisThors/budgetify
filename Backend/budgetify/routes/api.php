@@ -56,6 +56,7 @@ Route::middleware("web")->group(function () {
         Route::get('/piggy-banks', [PiggyBankController::class, 'getAll']);
         Route::put('/piggy-banks/{id}', [PiggyBankController::class, 'update']);
         Route::delete('/piggy-banks/{id}', [PiggyBankController::class, 'delete']);
+        Route::post('/piggy-banks/{id}/crash', [PiggyBankController::class, 'crash']);
         Route::post('/piggy-banks', [PiggyBankController::class, 'store']);
 
         Route::get('/obligatories', [ObligatoryController::class, 'getAll']);

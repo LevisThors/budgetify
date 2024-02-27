@@ -2,10 +2,11 @@ import BarChart from "@/components/partials/BarChart";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 import PATHS from "@/paths";
+import Statistics from "@/components/Statistics";
 
 async function getCategoryStatistics(accountId: string) {
     const response = await fetch(
-        `${PATHS.API.BASE.CATEGORY_STATISTICS.GET}?account_id=${accountId}&date=2024-02-04,2024-02-10`,
+        `${PATHS.API.BASE.CATEGORY_STATISTICS.GET}?account_id=${accountId}`,
         {
             headers: {
                 Cookie: `laravel_session=${
@@ -27,13 +28,10 @@ export default async function StatisticPage({
     params: { account: string };
 }) {
     const categoryStatistics = await getCategoryStatistics(params.account);
-
+    console.log(categoryStatistics);
     return (
-        <div>
-            <h1>StatisticPage</h1>
-            <Suspense>
-                <BarChart categoryStatistics={categoryStatistics} />
-            </Suspense>
-        </div>
+        <Suspense>
+            <Statistics statistics={categoryStatistics} />
+        </Suspense>
     );
 }

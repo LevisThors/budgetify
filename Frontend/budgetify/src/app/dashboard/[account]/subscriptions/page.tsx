@@ -1,5 +1,4 @@
 import Card from "@/components/partials/Card";
-import { TransactionType } from "@/type/TransactionType";
 import { cookies } from "next/headers";
 import ActionButton from "@/components/partials/ActionButton";
 import {

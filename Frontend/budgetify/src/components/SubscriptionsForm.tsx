@@ -273,10 +273,15 @@ function SubscriptionCreateForm({
                     closeRef?.current?.click();
                     if (type === "edit") {
                         if (changeActiveType) changeActiveType("view");
+                        toast({
+                            description: MESSAGE.SUCCESS.UPDATE("Subscription"),
+                        });
+                    } else {
+                        toast({
+                            description:
+                                MESSAGE.SUCCESS.CREATION("Subscription"),
+                        });
                     }
-                    toast({
-                        description: MESSAGE.SUCCESS.CREATION("Subscription"),
-                    });
                 }
                 if (res.status === 400) {
                     const { message } = await res.json();
@@ -327,15 +332,14 @@ function SubscriptionCreateForm({
                     onChange={handleChange}
                     required={true}
                 />
-                <DateRangePicker onDateChange={handleDateChange} />
-                {/* <Input
-                    label="Payment Date"
-                    name="first_payment_date"
-                    type="date"
-                    value={formData.first_payment_date.toString()}
-                    onChange={handleChange}
-                    required={true}
-                /> */}
+                <DateRangePicker
+                    onDateChange={handleDateChange}
+                    originalDate={{
+                        from: formData.first_payment_date as Date,
+                        to: formData.second_payment_date as Date | undefined,
+                    }}
+                />
+
                 <Input
                     label="Description"
                     name="description"

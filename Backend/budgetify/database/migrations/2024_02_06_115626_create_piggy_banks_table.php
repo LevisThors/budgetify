@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('goal');
             $table->decimal('goal_amount', 8, 2);
             $table->decimal('saved_amount', 8, 2)->default(0);
-            $table->date('date');
+            $table->date('date')->nullable();
             $table->foreignId('account_id')->constrained()->onDelete('cascade');
 
             $table->timestamps();

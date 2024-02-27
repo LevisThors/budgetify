@@ -36,8 +36,12 @@ export default function PiggyBankButton({
                                     {piggyBank.goal}
                                 </span>
                                 <span className="text-sm">
-                                    {piggyBank.saved_amount} /{" "}
-                                    {piggyBank.goal_amount}{" "}
+                                    {piggyBank.saved_amount >
+                                    piggyBank.goal_amount
+                                        ? piggyBank.saved_amount
+                                        : piggyBank.saved_amount +
+                                          " / " +
+                                          piggyBank.goal_amount}
                                     {currencyToSymbol(piggyBank.currency || "")}
                                 </span>
                             </div>
@@ -61,9 +65,12 @@ export default function PiggyBankButton({
                         <div className="w-full">
                             <Progress
                                 value={
-                                    (piggyBank.saved_amount /
-                                        piggyBank.goal_amount) *
-                                    100
+                                    piggyBank.saved_amount >
+                                    piggyBank.goal_amount
+                                        ? 100
+                                        : (piggyBank.saved_amount /
+                                              piggyBank.goal_amount) *
+                                          100
                                 }
                                 className="w-full h-2"
                             />

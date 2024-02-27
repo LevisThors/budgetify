@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\PiggyBank;
+use App\Models\Transaction;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -69,5 +71,28 @@ class PiggyBankController extends Controller
         $piggyBank->update($request->all());
 
         return response()->json($piggyBank, 200);
+    }
+
+    public function crash($id)
+    {
+        $piggyBank = $this->getModel()::find($id);
+
+        $account = $piggyBank->account;
+        $account->balance += $piggyBank->saved_amount;
+        $account->save();
+
+        if ($piggyBank->saved_amount > 0) {
+            Transaction::create([
+                'title' => $piggyBank->goal,
+                'type' => "Income",
+                'amount' => $piggyBank->saved_amount,
+                'payment_date' => Carbon::now(),
+                'account_id' => $account->id,
+            ]);
+        }
+
+        $piggyBank->delete();
+
+        return response()->json(["message" => "Piggy Bank Crashed"], 200);
     }
 }

@@ -1,7 +1,7 @@
 const MESSAGE = {
     ERROR: {
         INVALID_CHARACTER:
-            "Please, enter the name that doesnt include any of these characters: «*~`!@#$%^&/><+_=|»",
+            "Please, enter the name that doesn't include any of these characters: «*~`!@#$%^&/><+_=|»",
         EXISTS: (name: string) => `${name} with such name already exists`,
         NOT_FOUND: (name: string) => `${name} not found`,
         INVALID_INPUT: (name: string) => `Please enter a valid ${name}`,
@@ -15,6 +15,7 @@ const MESSAGE = {
         CREATION: (name: string) => `${name} has been created successfully`,
         UPDATE: (name: string) => `${name} has been updated successfully`,
         DELETE: (name: string) => `${name} has been deleted successfully`,
+        CRASH: (name: string) => `${name} has been crashed successfully`,
     },
     BUTTON: {
         ADD: (name: string) => `Add ${name}`,
@@ -26,6 +27,9 @@ const MESSAGE = {
     },
     PAYMENT: {
         NEXT_DATE: "Next payment date",
+    },
+    HEADER: {
+        INFORMATION: (name: string) => `${name} Information`,
     },
 };
 

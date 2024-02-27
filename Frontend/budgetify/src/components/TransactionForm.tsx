@@ -13,6 +13,7 @@ import Dropzone from "./partials/Dropzone";
 import MultiSelect from "./partials/MultiSelect";
 import PATHS from "@/paths";
 import Image from "next/image";
+import { format } from "date-fns";
 import {
     DialogTrigger,
     Dialog,
@@ -22,10 +23,11 @@ import {
     DialogHeader,
 } from "./ui/dialog";
 import DocumentImage from "./partials/DocumentImage";
-import ActionButton from "./partials/ActionButton";
+import { useLoading } from "../context/Loading";
 import MESSAGE from "@/messages";
 import DialogBody from "./partials/DialogBody";
 import Link from "next/link";
+import { DatePicker } from "./partials/DatePicker";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -216,6 +218,8 @@ function TransactionCreateForm({
     const [refetch, setRefetch] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const closeRef = useRef<HTMLButtonElement>(null);
+    const prevDateRef = useRef<Date | undefined>();
+    const { loadingStates, setLoadingStates } = useLoading();
     const { toast } = useToast();
 
     useEffect(() => {
@@ -287,6 +291,17 @@ function TransactionCreateForm({
         setError(MESSAGE.ERROR.FILL_REQUIRED);
     };
 
+    const handleDateChange = (date: Date | undefined) => {
+        if (date && (!prevDateRef.current || date !== prevDateRef.current)) {
+            setFormData((prev) => ({
+                ...prev,
+                payment_date: format(date || new Date(), "yyyy-MM-dd"),
+            }));
+        }
+
+        prevDateRef.current = date;
+    };
+
     const isFormValid = () => {
         return (
             formData.title.trim() !== "" &&
@@ -339,10 +354,13 @@ function TransactionCreateForm({
                     credentials: "include",
                     body: data,
                 }
-            ).then((res) => {
+            ).then(async (res) => {
                 if (res.status === 200) {
                     revalidate();
                     closeRef?.current?.click();
+                    const item = await res.json();
+                    setLoadingStates({ ...loadingStates, [item.id]: true });
+
                     if (type === "edit") {
                         if (changeActiveType) changeActiveType("view");
                     }
@@ -434,13 +452,9 @@ function TransactionCreateForm({
                     onChange={handleChange}
                     required={true}
                 />
-                <Input
-                    label="Payment Date"
-                    name="payment_date"
-                    type="date"
-                    value={formData.payment_date.toString()}
-                    onChange={handleChange}
-                    required={true}
+                <DatePicker
+                    onDateChange={handleDateChange}
+                    originalDate={formData.payment_date as Date}
                 />
                 <Input
                     label="Payee"

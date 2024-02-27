@@ -46,10 +46,12 @@ const PATHS = {
             PIGGY_BANK: {
                 GET: "/backend/api/piggy-banks",
                 POST: "/backend/api/piggy-banks",
-                PUT: (obligatoryId: string | number) =>
-                    `/backend/api/piggy-banks/${obligatoryId}`,
-                DELETE: (obligatoryId: string | number) =>
-                    `/backend/api/piggy-banks/${obligatoryId}`,
+                PUT: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}`,
+                DELETE: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}`,
+                CRASH: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}/crash`,
             },
             AUTH: {
                 GET_CSRF: "/backend/sanctum/csrf-cookie",

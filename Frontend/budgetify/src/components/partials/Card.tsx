@@ -5,6 +5,7 @@ import Image from "next/image";
 import { SubscriptionType } from "@/type/SubscriptionType";
 import MESSAGE from "@/messages";
 import Subscription from "../Subscription";
+import ItemLoading from "./ItemLoading";
 
 export default function Card({
     transaction,
@@ -17,6 +18,9 @@ export default function Card({
 }) {
     return (
         <div className="w-full h-[90px] bg-white rounded-lg px-4 py-3 relative">
+            <Suspense>
+                <ItemLoading item={transaction} />
+            </Suspense>
             <div className="flex items-center h-full">
                 <div className="w-1/4 h-full bg-gray-100 rounded-lg font-bold flex justify-center items-center">
                     <span className="text-xl">

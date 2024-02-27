@@ -94,18 +94,17 @@ class CategoryController extends Controller
 
             $categories->whereHas('transactions', function ($query) use ($dates) {
                 $query->whereBetween('payment_date', [$dates[0], $dates[1]]);
-            })->orWhereHas('subscriptions', function ($query) use ($dates) {
-                $query->whereBetween('payment_date', [$dates[0], $dates[1]]);
             });
         }
 
-        $categories = $categories->get();
+        $categories = $categories->where("type", "Expenses")->get();
 
         $statistics = [];
         foreach ($categories as $category) {
-            $statistics[$category->title] = $category->transactions->where("type", "Expenses")->sum("amount")
-                + $category->subscriptions->sum("amount");
+            $statistics[$category->title] = $category->transactions->where("type", "Expenses")->sum("amount");
         }
+
+        $statistics["currency"] = Account::find($request->account_id)->currency;
 
         return response()->json($statistics, 200);
     }

@@ -28,7 +28,7 @@ export default function MultiSelect({
     refetch,
     onSelect,
     selected,
-    type,
+    type = "Expenses",
 }: MultiSelectProps) {
     const [newData, setNewData] = useState<CategoryType[]>(categories);
     const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
@@ -38,8 +38,16 @@ export default function MultiSelect({
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        setNewData(categories);
-    }, [categories]);
+        setNewData(
+            categories.filter(
+                (category) =>
+                    !selected?.some(
+                        (selectedCategory) =>
+                            selectedCategory.id === category.id
+                    )
+            )
+        );
+    }, [categories, selected]);
 
     const handleOpenInput = () => {
         setIsCategoryInput((prev) => !prev);
