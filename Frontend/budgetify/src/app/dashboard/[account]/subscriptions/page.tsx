@@ -19,6 +19,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import SubscriptionForm from "@/components/SubscriptionsForm";
 import MESSAGE from "@/messages";
 import { SubscriptionType } from "@/type/SubscriptionType";
+import { LoadingProvider } from "@/context/Loading";
 
 interface SubscriptionsPageProps {
     params: {
@@ -100,14 +101,16 @@ export default async function SubscriptionsPage({
                             {subscriptionsData?.message !== "Empty account" ? (
                                 subscriptionsData?.subscriptions?.map(
                                     (subscription: SubscriptionType) => (
-                                        <Card
-                                            key={subscription.id}
-                                            transaction={subscription}
-                                            page="subscriptions"
-                                            currency={currencyToSymbol(
-                                                subscriptionsData.currency
-                                            )}
-                                        />
+                                        <LoadingProvider key={subscription.id}>
+                                            <Card
+                                                key={subscription.id}
+                                                transaction={subscription}
+                                                page="subscriptions"
+                                                currency={currencyToSymbol(
+                                                    subscriptionsData.currency
+                                                )}
+                                            />
+                                        </LoadingProvider>
                                     )
                                 )
                             ) : (

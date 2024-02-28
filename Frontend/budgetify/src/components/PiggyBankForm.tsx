@@ -18,6 +18,7 @@ import { DatePicker } from "./partials/DatePicker";
 import { format } from "date-fns";
 import { Dialog, DialogTrigger } from "./ui/dialog";
 import DialogBody from "./partials/DialogBody";
+import { Sheet } from "lucide-react";
 
 const emptyPiggyBank = {
     goal: "",
@@ -239,84 +240,105 @@ function PiggyBankView({
     };
 
     return (
-        <>
-            <SheetHeader className="flex flex-row justify-between items-center">
-                <h1 className="text-2xl">
-                    {MESSAGE.HEADER.INFORMATION("Piggy Bank")}
-                </h1>
-                <div>
-                    <button onClick={() => onTypeChange("edit")}>
-                        <Image
-                            src="/icons/edit.svg"
-                            alt="edit account"
-                            width={36}
-                            height={36}
-                        />
-                    </button>
-                    <button>
-                        <Image
-                            src="/icons/delete.svg"
-                            alt="delete account"
-                            width={32}
-                            height={32}
-                        />
-                    </button>
-                    <SheetClose ref={closeRef}>
-                        <Image
-                            src="/icons/close.svg"
-                            alt="close"
-                            width={35}
-                            height={35}
-                        />
-                    </SheetClose>
-                </div>
-            </SheetHeader>
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col justify-between gap-1">
-                    <span className="text-lg">
-                        {piggyBank.saved_amount} / {piggyBank.goal_amount}{" "}
-                        {currencyToSymbol(piggyBank.currency || "")}
-                    </span>
-                    <Progress
-                        value={
-                            (piggyBank.saved_amount / piggyBank.goal_amount) *
-                            100
-                        }
-                        className="h-3 bg-[#FECEE2]"
-                    />
-                </div>
-                <div>
-                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Goal:</span>
-                        <span className="w-2/3">{piggyBank.goal}</span>
+        <div className="flex flex-col justify-between h-full">
+            <div>
+                <SheetHeader className="flex flex-row justify-between items-center">
+                    <h1 className="text-2xl">
+                        {MESSAGE.HEADER.INFORMATION("Piggy Bank")}
+                    </h1>
+                    <div>
+                        <button onClick={() => onTypeChange("edit")}>
+                            <Image
+                                src="/icons/edit.svg"
+                                alt="edit account"
+                                width={36}
+                                height={36}
+                            />
+                        </button>
+                        <button>
+                            <Image
+                                src="/icons/delete.svg"
+                                alt="delete account"
+                                width={32}
+                                height={32}
+                            />
+                        </button>
+                        <SheetClose ref={closeRef}>
+                            <Image
+                                src="/icons/close.svg"
+                                alt="close"
+                                width={35}
+                                height={35}
+                            />
+                        </SheetClose>
                     </div>
-                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Goal Amount:</span>
-                        <span className="w-2/3">
-                            {piggyBank.goal_amount}{" "}
+                </SheetHeader>
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col justify-between gap-1">
+                        <span className="text-lg">
+                            {piggyBank.saved_amount} / {piggyBank.goal_amount}{" "}
                             {currencyToSymbol(piggyBank.currency || "")}
                         </span>
+                        <Progress
+                            value={
+                                (piggyBank.saved_amount /
+                                    piggyBank.goal_amount) *
+                                100
+                            }
+                            className="h-3 bg-[#FECEE2]"
+                        />
                     </div>
-                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Saved Amount:</span>
-                        <span className="w-2/3">
-                            {piggyBank.saved_amount}{" "}
-                            {currencyToSymbol(piggyBank.currency || "")}
-                        </span>
+                    <div>
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">Goal:</span>
+                            <span className="w-2/3">{piggyBank.goal}</span>
+                        </div>
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">
+                                Goal Amount:
+                            </span>
+                            <span className="w-2/3">
+                                {piggyBank.goal_amount}{" "}
+                                {currencyToSymbol(piggyBank.currency || "")}
+                            </span>
+                        </div>
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">
+                                Saved Amount:
+                            </span>
+                            <span className="w-2/3">
+                                {piggyBank.saved_amount}{" "}
+                                {currencyToSymbol(piggyBank.currency || "")}
+                            </span>
+                        </div>
                     </div>
+                    <Dialog>
+                        <DialogTrigger asChild>
+                            <div className="flex items-center gap-1 bg-[#FECEE2] rounded-lg text-[#373737] font-bold w-fit px-2 py-1">
+                                <span className="w-[35px] h-[35px] flex justify-center items-center bg-white rounded-full">
+                                    <Image
+                                        src="/icons/piggyBank.svg"
+                                        width={35}
+                                        height={35}
+                                        alt="Piggy Bank"
+                                        loading="eager"
+                                    />
+                                </span>
+                                <span className="pr-3">Crash</span>
+                            </div>
+                        </DialogTrigger>
+                        <DialogBody
+                            header="Delete Account"
+                            body={MESSAGE.WARNING.DELETE("Account")}
+                            onYes={() => handleCrash()}
+                        />
+                    </Dialog>
                 </div>
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <button>Crash</button>
-                    </DialogTrigger>
-                    <DialogBody
-                        header="Delete Account"
-                        body={MESSAGE.WARNING.DELETE("Account")}
-                        onYes={() => handleCrash()}
-                    />
-                </Dialog>
             </div>
-        </>
+            <SheetFooter>
+                <SheetClose className="text-lg">Close</SheetClose>
+            </SheetFooter>
+        </div>
     );
 }
 

@@ -91,7 +91,7 @@ export default async function TransactionsPage({
         category.Expenses.length > 0 || category.Income.length > 0;
 
     return (
-        <section className="flex w-full justify-between h-full">
+        <section className="flex w-full justify-between h-full min-h-[90vh]">
             <div className="w-2/3 px-16 flex flex-col gap-5">
                 <Suspense>
                     <SearchBar />
@@ -123,7 +123,7 @@ export default async function TransactionsPage({
                     </ScrollArea>
                 </Suspense>
             </div>
-            <div className="w-1/3 flex flex-col justify-between h-full gap-4">
+            <div className="w-1/3 flex flex-col justify-between h-full gap-4 min-h-[85vh]">
                 <div className="flex flex-col gap-4">
                     <Suspense>
                         <FilterButton type="Income" />

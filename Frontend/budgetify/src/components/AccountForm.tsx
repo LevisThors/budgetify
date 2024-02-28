@@ -60,22 +60,27 @@ export default function AccountForm({
 
 function AccountViewForm({ account }: { account: AccountType }) {
     return (
-        <div>
-            {displayFields.map((field) => (
-                <div
-                    key={field}
-                    className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg"
-                >
-                    <span className="w-1/3 font-bold">{field}:</span>
-                    <span className="w-2/3">
-                        {account[field.toLowerCase()]}{" "}
-                        {field.toLowerCase() === "balance"
-                            ? currencyToSymbol(account.currency)
-                            : field.toLowerCase() === "currency" &&
-                              `(${currencyToSymbol(account.currency)})`}
-                    </span>
-                </div>
-            ))}
+        <div className="flex flex-col justify-between h-[95%]">
+            <div>
+                {displayFields.map((field) => (
+                    <div
+                        key={field}
+                        className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg"
+                    >
+                        <span className="w-1/3 font-bold">{field}:</span>
+                        <span className="w-2/3">
+                            {account[field.toLowerCase()]}{" "}
+                            {field.toLowerCase() === "balance"
+                                ? currencyToSymbol(account.currency)
+                                : field.toLowerCase() === "currency" &&
+                                  `(${currencyToSymbol(account.currency)})`}
+                        </span>
+                    </div>
+                ))}
+            </div>
+            <SheetFooter>
+                <SheetClose className="text-lg">Close</SheetClose>
+            </SheetFooter>
         </div>
     );
 }

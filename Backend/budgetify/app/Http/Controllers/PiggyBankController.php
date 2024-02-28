@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\PiggyBank;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -58,6 +59,7 @@ class PiggyBankController extends Controller
 
             $account = $piggyBank->account;
             $account->balance -= (int)$request->amountToSave;
+
             if ($account->balance < 0) {
                 return response()->json(["error" => "Insufficient funds"], 400);
             } else {
@@ -82,13 +84,27 @@ class PiggyBankController extends Controller
         $account->save();
 
         if ($piggyBank->saved_amount > 0) {
-            Transaction::create([
+            $transaction = Transaction::create([
                 'title' => $piggyBank->goal,
                 'type' => "Income",
                 'amount' => $piggyBank->saved_amount,
                 'payment_date' => Carbon::now(),
                 'account_id' => $account->id,
             ]);
+
+            $piggyCategory = $account->categories->where("type", "Income")->where("title", "Piggy Withdrawal")->first();
+
+            if (!$piggyCategory) {
+                $piggyCategory = Category::create(
+                    [
+                        "title" => "Piggy Withdrawal",
+                        "type" => "Income",
+                        "account_id" => $account->id,
+                    ]
+                );
+            }
+
+            $transaction->categories()->attach($piggyCategory);
         }
 
         $piggyBank->delete();

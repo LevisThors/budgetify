@@ -17,6 +17,7 @@ import Button from "./partials/Button";
 import { DateRangePicker } from "./partials/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
+import { useLoading } from "@/context/Loading";
 
 interface SubscriptionFormProps {
     type: string;
@@ -71,54 +72,51 @@ function SubscriptionViewForm({
 }: {
     subscription: SubscriptionType;
 }) {
-    const [isDocumentOpen, setIsDocumentOpen] = useState("");
-
-    const handleOpenDocument = (path: string) => {
-        setIsDocumentOpen(path);
-    };
-
-    const handleCloseDocument = () => {
-        setIsDocumentOpen("");
-    };
-
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex justify-between">
-                <span className="text-3xl text-red-500">
-                    {subscription.amount}$
-                </span>
-            </div>
-            <div>
-                <h1 className="text-2xl">{subscription.title}</h1>
-            </div>
-            <div className="flex gap-3">
-                {subscription.categories.map((category) => (
-                    <span
-                        key={category.id}
-                        className="px-9 py-3 border border-black rounded-lg font-bold"
-                    >
-                        {category.title}
-                    </span>
-                ))}
-            </div>
-            <div>
-                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                    <span className="w-1/3 font-bold">Payment Date:</span>
-                    <span className="w-2/3">
-                        {subscription.first_payment_date.toString()}{" "}
-                        {subscription.second_payment_date &&
-                            ` - ${subscription.second_payment_date.toString()}`}
+        <div className="h-[95%] flex flex-col justify-between">
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between">
+                    <span className="text-3xl text-red-500">
+                        {subscription.amount}$
                     </span>
                 </div>
-                {subscription.description && (
+                <div>
+                    <h1 className="text-2xl">{subscription.title}</h1>
+                </div>
+                <div className="flex gap-3">
+                    {subscription.categories.map((category) => (
+                        <span
+                            key={category.id}
+                            className="px-9 py-3 border border-black rounded-lg font-bold"
+                        >
+                            {category.title}
+                        </span>
+                    ))}
+                </div>
+                <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Description:</span>
+                        <span className="w-1/3 font-bold">Payment Date:</span>
                         <span className="w-2/3">
-                            {subscription.description}
+                            {subscription.first_payment_date.toString()}{" "}
+                            {subscription.second_payment_date &&
+                                ` - ${subscription.second_payment_date.toString()}`}
                         </span>
                     </div>
-                )}
+                    {subscription.description && (
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">
+                                Description:
+                            </span>
+                            <span className="w-2/3">
+                                {subscription.description}
+                            </span>
+                        </div>
+                    )}
+                </div>
             </div>
+            <SheetFooter>
+                <SheetClose className="text-lg">Close</SheetClose>
+            </SheetFooter>
         </div>
     );
 }
@@ -142,6 +140,8 @@ function SubscriptionCreateForm({
     const [error, setError] = useState<string>("");
     const closeRef = useRef<HTMLButtonElement>(null);
     const prevDateRef = useRef<DateRange | undefined>();
+    const { loadingStates, setLoadingStates } = useLoading();
+
     const { toast } = useToast();
 
     useEffect(() => {
@@ -271,8 +271,11 @@ function SubscriptionCreateForm({
                 if (res.status === 200) {
                     revalidate();
                     closeRef?.current?.click();
+                    const item = await res.json();
+
                     if (type === "edit") {
                         if (changeActiveType) changeActiveType("view");
+                        setLoadingStates({ ...loadingStates, [item.id]: true });
                         toast({
                             description: MESSAGE.SUCCESS.UPDATE("Subscription"),
                         });

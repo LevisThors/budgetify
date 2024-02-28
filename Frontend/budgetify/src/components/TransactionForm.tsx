@@ -91,111 +91,145 @@ function TransactionViewForm({
     };
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex justify-between">
-                <span className="text-lg">{transaction.type}</span>
-                <span
-                    className={`text-3xl ${
-                        transaction.type === "Expenses"
-                            ? "text-red-500"
-                            : "text-green-500"
-                    }`}
-                >
-                    {transaction.type === "Expenses" ? "-" : ""}
-                    {transaction.amount}$
-                </span>
-            </div>
-            <div>
-                <h1 className="text-2xl">{transaction.title}</h1>
-            </div>
-            <div className="flex gap-3">
-                {transaction.categories.map((category) => (
-                    <span
-                        key={category.id}
-                        className="px-9 py-3 border border-black rounded-lg font-bold"
-                    >
-                        {category.title}
+        <div className="flex flex-col justify-between h-[95%]">
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between">
+                    <span className="text-lg flex items-center gap-2">
+                        <span
+                            className={`h-[30px] w-[30px] flex justify-center items-center rounded-full ${
+                                transaction.type === "Income"
+                                    ? "bg-[#21C206]"
+                                    : "bg-[#EE3F19]"
+                            }`}
+                        >
+                            <Image
+                                src="/icons/arrow.svg"
+                                width={15}
+                                height={17}
+                                alt="filter-button"
+                                className={
+                                    transaction.type === "Expenses"
+                                        ? "transform rotate-180"
+                                        : ""
+                                }
+                            />
+                        </span>
+                        {transaction.type}
                     </span>
-                ))}
-            </div>
-            <div>
-                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                    <span className="w-1/3 font-bold">Payment Date:</span>
-                    <span className="w-2/3">
-                        {transaction.payment_date.toString()}
+                    <span
+                        className={`text-3xl ${
+                            transaction.type === "Expenses"
+                                ? "text-red-500"
+                                : "text-green-500"
+                        }`}
+                    >
+                        {transaction.type === "Expenses" ? "-" : ""}
+                        {transaction.amount}$
                     </span>
                 </div>
-                {transaction.payee && (
+                <div>
+                    <h1 className="text-2xl">{transaction.title}</h1>
+                </div>
+                <div className="flex gap-3">
+                    {transaction.categories.map((category) => (
+                        <span
+                            key={category.id}
+                            className="px-9 py-3 border border-black rounded-lg font-bold"
+                        >
+                            {category.title}
+                        </span>
+                    ))}
+                </div>
+                <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Payee:</span>
-                        <span className="w-2/3">{transaction.payee}</span>
+                        <span className="w-1/3 font-bold">Payment Date:</span>
+                        <span className="w-2/3">
+                            {transaction.payment_date.toString()}
+                        </span>
                     </div>
-                )}
-                {transaction.description && (
-                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Description:</span>
-                        <span className="w-2/3">{transaction.description}</span>
-                    </div>
-                )}
-            </div>
-            <div>
-                {transaction.documents?.map(
-                    (document: { path: string; name: string; url: string }) => (
-                        <div key={document.url}>
-                            <div
-                                className="flex items-center justify-between w-full border-b py-1.5 border-authBlack cursor-pointer"
-                                onClick={() =>
-                                    handleOpenDocument(document.path)
-                                }
-                            >
-                                <div className="flex items-center">
-                                    <Image
-                                        src="/icons/image.svg"
-                                        alt="Uploaded image"
-                                        width={70}
-                                        height={60}
-                                    />
-                                    <span className="text-xs max-w-full overflow-ellipsis">
-                                        {document.name}
-                                    </span>
-                                </div>
-                                <div className="h-[50px]">
-                                    <Link
-                                        href={PATHS.API.PROXY.TRANSACTION.DOWNLOAD(
-                                            document.path
-                                                .split("/")
-                                                .join("-s-")
-                                                .split("\\")
-                                                .join("-s-")
-                                        )}
-                                        download={document.name}
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                        }}
-                                        className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5"
-                                    >
-                                        <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
-                                            <Image
-                                                src="/icons/download.svg"
-                                                width={15}
-                                                height={17}
-                                                alt="filter-button"
-                                            />
-                                        </span>
-                                        Download
-                                    </Link>
-                                </div>
-                            </div>
-                            {isDocumentOpen === document.path && (
-                                <DocumentImage
-                                    imagePath={document.url}
-                                    closeDocument={handleCloseDocument}
-                                />
-                            )}
+                    {transaction.payee && (
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">Payee:</span>
+                            <span className="w-2/3">{transaction.payee}</span>
                         </div>
-                    )
-                )}
+                    )}
+                    {transaction.description && (
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">
+                                Description:
+                            </span>
+                            <span className="w-2/3">
+                                {transaction.description}
+                            </span>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    {transaction.documents?.map(
+                        (document: {
+                            path: string;
+                            name: string;
+                            url: string;
+                        }) => (
+                            <div key={document.url}>
+                                <div
+                                    className="flex items-center justify-between w-full border-b py-1.5 border-authBlack cursor-pointer"
+                                    onClick={() =>
+                                        handleOpenDocument(document.path)
+                                    }
+                                >
+                                    <div className="flex items-center">
+                                        <Image
+                                            src="/icons/image.svg"
+                                            alt="Uploaded image"
+                                            width={70}
+                                            height={60}
+                                        />
+                                        <span className="text-xs max-w-full overflow-ellipsis">
+                                            {document.name}
+                                        </span>
+                                    </div>
+                                    <div className="h-[50px]">
+                                        <Link
+                                            href={PATHS.API.PROXY.TRANSACTION.DOWNLOAD(
+                                                document.path
+                                                    .split("/")
+                                                    .join("-s-")
+                                                    .split("\\")
+                                                    .join("-s-")
+                                            )}
+                                            download={document.name}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                            className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5"
+                                        >
+                                            <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
+                                                <Image
+                                                    src="/icons/download.svg"
+                                                    width={15}
+                                                    height={17}
+                                                    alt="filter-button"
+                                                />
+                                            </span>
+                                            Download
+                                        </Link>
+                                    </div>
+                                </div>
+                                {isDocumentOpen === document.path && (
+                                    <DocumentImage
+                                        imagePath={document.url}
+                                        closeDocument={handleCloseDocument}
+                                    />
+                                )}
+                            </div>
+                        )
+                    )}
+                </div>
             </div>
+            <SheetFooter>
+                <SheetClose className="text-lg">Close</SheetClose>
+            </SheetFooter>
         </div>
     );
 }
