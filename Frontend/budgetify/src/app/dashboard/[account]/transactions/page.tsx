@@ -186,7 +186,9 @@ export default async function TransactionsPage({
                     </Suspense>
                 </div>
                 <div>
-                    <PiggyBank accountId={params.account} />
+                    {!isNaN(Number(params.account)) && (
+                        <PiggyBank accountId={params.account} />
+                    )}
                 </div>
             </div>
         </section>
