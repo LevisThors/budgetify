@@ -19,6 +19,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import SubscriptionForm from "@/components/SubscriptionsForm";
 import MESSAGE from "@/messages";
 import { SubscriptionType } from "@/type/SubscriptionType";
+import ObligatoryForm from "@/components/ObligatoryForm";
+import { LoadingProvider } from "@/context/Loading";
+import { ObligatoryType } from "@/type/ObligatoryType";
 
 interface ObligatoriesPageProps {
     params: {
@@ -99,20 +102,22 @@ export default async function ObligatoriesPage({
                         <div className="max-h-[75vh] flex flex-col gap-5">
                             {obligatoriesData?.message !== "Empty account" ? (
                                 obligatoriesData?.obligatories?.map(
-                                    (subscription: SubscriptionType) => (
-                                        <Card
-                                            key={subscription.id}
-                                            transaction={subscription}
-                                            page="subscriptions"
-                                            currency={currencyToSymbol(
-                                                obligatoriesData.currency
-                                            )}
-                                        />
+                                    (obligatory: ObligatoryType) => (
+                                        <LoadingProvider key={obligatory.id}>
+                                            <Card
+                                                key={obligatory.id}
+                                                transaction={obligatory}
+                                                page="obligatories"
+                                                currency={currencyToSymbol(
+                                                    obligatoriesData.currency
+                                                )}
+                                            />
+                                        </LoadingProvider>
                                     )
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    {MESSAGE.ERROR.NOT_FOUND("Subscriptions")}
+                                    {MESSAGE.ERROR.NOT_FOUND("Obligatories")}
                                 </span>
                             )}
                         </div>
@@ -125,13 +130,13 @@ export default async function ObligatoriesPage({
                         <Sheet>
                             <SheetTrigger>
                                 <ActionButton
-                                    text={MESSAGE.BUTTON.ADD("Subscription")}
+                                    text={MESSAGE.BUTTON.ADD("Obligatory")}
                                 />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">
-                                        {MESSAGE.BUTTON.ADD("Subscription")}
+                                        {MESSAGE.BUTTON.ADD("Obligatory")}
                                     </h1>
                                     <div>
                                         <SheetClose>
@@ -144,7 +149,9 @@ export default async function ObligatoriesPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <SubscriptionForm type="create" />
+                                <LoadingProvider>
+                                    <ObligatoryForm type="create" />
+                                </LoadingProvider>
                             </SheetContent>
                         </Sheet>
                         <Sheet>
@@ -172,7 +179,9 @@ export default async function ObligatoriesPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <TransactionForm type="create" />
+                                <LoadingProvider>
+                                    <TransactionForm type="create" />
+                                </LoadingProvider>
                             </SheetContent>
                         </Sheet>
                     </Suspense>

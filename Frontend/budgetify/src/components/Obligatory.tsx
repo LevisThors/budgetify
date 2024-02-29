@@ -11,19 +11,19 @@ import {
 } from "@/components/ui/sheet";
 import { DialogTrigger, Dialog } from "./ui/dialog";
 import DialogBody from "./partials/DialogBody";
-import SubscriptionForm from "./SubscriptionsForm";
 import Image from "next/image";
 import PATHS from "@/paths";
 import { getCookie } from "cookies-next";
 import revalidate from "@/util/revalidate";
 import { toast } from "./ui/use-toast";
 import MESSAGE from "@/messages";
-import { SubscriptionType } from "@/type/SubscriptionType";
+import { ObligatoryType } from "@/type/ObligatoryType";
+import ObligatoryForm from "./ObligatoryForm";
 
-export default function Subscription({
-    subscription,
+export default function Obligatory({
+    obligatory,
 }: {
-    subscription: SubscriptionType;
+    obligatory: ObligatoryType;
 }) {
     const [activeType, setActiveType] = useState("view");
     const closeRef = useRef<HTMLButtonElement>(null);
@@ -33,7 +33,7 @@ export default function Subscription({
     };
 
     const handleDelete = async (id: string) => {
-        fetch(PATHS.API.PROXY.SUBSCIRPTION.DELETE(id), {
+        fetch(PATHS.API.PROXY.OBLIGATORY.DELETE(id), {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json",
@@ -46,7 +46,7 @@ export default function Subscription({
             if (res.status === 200) {
                 revalidate();
                 toast({
-                    description: MESSAGE.SUCCESS.DELETE("Subscription"),
+                    description: MESSAGE.SUCCESS.DELETE("Obligatory"),
                     variant: "destructive",
                 });
                 closeRef?.current?.click();
@@ -64,8 +64,8 @@ export default function Subscription({
                 <SheetHeader className="flex flex-row justify-between items-center">
                     <h1 className="text-2xl">
                         {activeType === "view"
-                            ? "Subscription Information"
-                            : "Edit Subscription"}
+                            ? "Obligatory Information"
+                            : "Edit Obligatory"}
                     </h1>
                     <div>
                         {activeType === "view" ? (
@@ -89,14 +89,13 @@ export default function Subscription({
                                         />
                                     </DialogTrigger>
                                     <DialogBody
-                                        header="Delete Subscription"
+                                        header="Delete Obligatory"
                                         body={MESSAGE.WARNING.DELETE(
-                                            "subscription"
+                                            "obligatory"
                                         )}
                                         onYes={() =>
                                             handleDelete(
-                                                subscription.id?.toString() ||
-                                                    ""
+                                                obligatory.id?.toString() || ""
                                             )
                                         }
                                     />
@@ -113,10 +112,10 @@ export default function Subscription({
                         </SheetClose>
                     </div>
                 </SheetHeader>
-                <SubscriptionForm
+                <ObligatoryForm
                     type={activeType}
                     changeActiveType={handleChangeActiveType}
-                    subscription={subscription}
+                    obligatory={obligatory}
                 />
             </SheetContent>
         </Sheet>

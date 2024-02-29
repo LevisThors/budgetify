@@ -147,7 +147,9 @@ export default async function SubscriptionsPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <SubscriptionForm type="create" />
+                                <LoadingProvider>
+                                    <SubscriptionForm type="create" />
+                                </LoadingProvider>
                             </SheetContent>
                         </Sheet>
                         <Sheet>
@@ -175,7 +177,9 @@ export default async function SubscriptionsPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <TransactionForm type="create" />
+                                <LoadingProvider>
+                                    <TransactionForm type="create" />
+                                </LoadingProvider>
                             </SheetContent>
                         </Sheet>
                     </Suspense>

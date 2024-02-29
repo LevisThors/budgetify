@@ -60,6 +60,8 @@ Route::middleware("web")->group(function () {
         Route::post('/piggy-banks', [PiggyBankController::class, 'store']);
 
         Route::get('/obligatories', [ObligatoryController::class, 'getAll']);
+        Route::put('/obligatories/{id}', [ObligatoryController::class, 'update']);
+        Route::delete('/obligatories/{id}', [ObligatoryController::class, 'delete']);
         Route::post('/obligatories', [ObligatoryController::class, 'store']);
     });
 });

@@ -6,6 +6,7 @@ import { SubscriptionType } from "@/type/SubscriptionType";
 import MESSAGE from "@/messages";
 import Subscription from "../Subscription";
 import ItemLoading from "./ItemLoading";
+import Obligatory from "../Obligatory";
 
 export default function Card({
     transaction,
@@ -14,19 +15,25 @@ export default function Card({
 }: {
     transaction: any;
     currency: string;
-    page?: "transactions" | "subscriptions";
+    page?: "transactions" | "subscriptions" | "obligatories";
 }) {
     return (
         <div className="w-full h-[90px] bg-white rounded-lg px-4 py-3 relative">
             <Suspense>
                 <ItemLoading item={transaction} />
             </Suspense>
-            <div className="flex items-center h-full">
-                <div className="w-1/4 h-full bg-gray-100 rounded-lg font-bold flex justify-center items-center">
-                    <span className="text-xl">
-                        {transaction.categories[0]?.title}
-                    </span>
-                </div>
+            <div
+                className={`flex items-center h-full ${
+                    page === "obligatories" ? "justify-between" : ""
+                }`}
+            >
+                {page !== "obligatories" && (
+                    <div className="w-1/4 h-full bg-gray-100 rounded-lg font-bold flex justify-center items-center">
+                        <span className="text-xl">
+                            {transaction.categories[0]?.title}
+                        </span>
+                    </div>
+                )}
                 <div className="w-2/4 h-full ps-3 flex flex-col justify-between">
                     <h1 className="text-lg">{transaction.title}</h1>
                     <div className="flex gap-1 items-center">
@@ -66,33 +73,49 @@ export default function Card({
                             </>
                         ) : (
                             <p>
-                                {MESSAGE.PAYMENT.NEXT_DATE}:{" "}
-                                <strong>
-                                    {transaction.first_payment_date}
-                                </strong>
+                                {page === "subscriptions" ? (
+                                    <>
+                                        {MESSAGE.PAYMENT.NEXT_DATE}:{" "}
+                                        <strong>
+                                            {transaction.first_payment_date}
+                                        </strong>
+                                    </>
+                                ) : (
+                                    <>
+                                        {MESSAGE.PAYMENT.DATES}:{" "}
+                                        <strong>
+                                            {transaction.first_payment_date} -{" "}
+                                            {transaction.second_payment_date}
+                                        </strong>
+                                    </>
+                                )}
                             </p>
                         )}
                     </div>
                 </div>
-                <div className="w-1/4 h-full text-end">
-                    <span
-                        className={`text-xl ${
-                            page === "transactions"
-                                ? transaction.type === "Income"
-                                    ? "text-green-500"
+                {page === "obligatories" && !transaction.amount ? (
+                    ""
+                ) : (
+                    <div className="w-1/4 h-full text-end">
+                        <span
+                            className={`text-xl ${
+                                page === "transactions"
+                                    ? transaction.type === "Income"
+                                        ? "text-green-500"
+                                        : "text-red-500"
                                     : "text-red-500"
-                                : "text-red-500"
-                        }`}
-                    >
-                        {page === "transactions"
-                            ? transaction.type === "Income"
-                                ? ""
-                                : "-"
-                            : ""}
-                        {transaction.amount}
-                        {currency}
-                    </span>
-                </div>
+                            }`}
+                        >
+                            {page === "transactions"
+                                ? transaction.type === "Income"
+                                    ? ""
+                                    : "-"
+                                : ""}
+                            {transaction.amount}
+                            {currency}
+                        </span>
+                    </div>
+                )}
             </div>
             <Suspense>
                 {page === "transactions" && (
@@ -100,6 +123,9 @@ export default function Card({
                 )}
                 {page === "subscriptions" && (
                     <Subscription subscription={transaction} />
+                )}
+                {page === "obligatories" && (
+                    <Obligatory obligatory={transaction} />
                 )}
             </Suspense>
         </div>

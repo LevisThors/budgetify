@@ -96,8 +96,8 @@ export default async function TransactionsPage({
                 <Suspense>
                     <SearchBar />
                 </Suspense>
-                <SortBy />
-                <Suspense fallback="LOADINGGG">
+                <SortBy type="transactions" />
+                <Suspense>
                     <ScrollArea>
                         <div className="max-h-[75vh] flex flex-col gap-5">
                             {transactionsData?.message !== "Empty account" ? (
@@ -180,7 +180,9 @@ export default async function TransactionsPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <TransactionForm type="create" />
+                                <LoadingProvider>
+                                    <TransactionForm type="create" />
+                                </LoadingProvider>
                             </SheetContent>
                         </Sheet>
                     </Suspense>

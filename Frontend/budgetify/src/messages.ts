@@ -27,6 +27,7 @@ const MESSAGE = {
     },
     PAYMENT: {
         NEXT_DATE: "Next payment date",
+        DATES: "Payment Dates",
     },
     HEADER: {
         INFORMATION: (name: string) => `${name} Information`,

@@ -8,7 +8,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class SubscriptionController extends Controller
 {
@@ -33,7 +32,7 @@ class SubscriptionController extends Controller
                     ->orWhere('description', 'like', $searchTerm)
                     ->orWhereHas('categories', function ($query) use ($searchTerm) {
                         $query->where('title', 'like', $searchTerm);
-                    });;
+                    });
             }
 
             if (isset($request['sort'])) {
@@ -127,7 +126,7 @@ class SubscriptionController extends Controller
             $subscription = $this->getModel()::find($id);
 
             if (!$subscription) {
-                return response()->json(['message' => 'Transaction not found'], 404);
+                return response()->json(['message' => 'Subscription not found'], 404);
             }
 
             $account = Auth::user()->accounts->find($request->account_id);

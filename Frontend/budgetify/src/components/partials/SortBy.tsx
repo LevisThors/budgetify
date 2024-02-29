@@ -11,7 +11,11 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
-export default function SortBy() {
+export default function SortBy({
+    type,
+}: {
+    type?: "transactions" | "subscriptions" | "obligatories";
+}) {
     const pathname = usePathname();
     const searchQuery = useSearchParams().get("query");
     const sortQuery = useSearchParams().get("sort");
@@ -35,7 +39,9 @@ export default function SortBy() {
 
     return (
         <Link
-            href={`${finalUrl}payment_date-${currentFilter ? "desc" : "asc"}`}
+            href={`${finalUrl}${
+                type === "transactions" ? "payment_date" : "created_at"
+            }-${currentFilter ? "desc" : "asc"}`}
             onClick={() => setCurrentFilter((prev) => !prev)}
             className="flex gap-1 px-4"
         >
