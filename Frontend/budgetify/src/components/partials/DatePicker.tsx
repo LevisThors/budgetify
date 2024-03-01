@@ -10,6 +10,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "../ui/tooltip";
 import { useEffect, useState } from "react";
 
 export function DatePicker({
@@ -34,21 +40,30 @@ export function DatePicker({
                     <legend className="text-sm ms-2 px-1 text-gray-400">
                         Payment Date <span className="text-red-500">*</span>
                     </legend>
-                    <Button
-                        id="date"
-                        variant={"outline"}
-                        className={cn(
-                            "w-full justify-between text-left text-base flex border-none font-medium",
-                            !date && "text-muted-foreground"
-                        )}
-                    >
-                        {date ? (
-                            format(date, "dd.MM.yyyy")
-                        ) : (
-                            <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="mr-2 h-4 w-4" />{" "}
-                    </Button>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    id="date"
+                                    variant={"outline"}
+                                    className={cn(
+                                        "w-full justify-between text-left text-base flex border-none font-medium",
+                                        !date && "text-muted-foreground"
+                                    )}
+                                >
+                                    {date ? (
+                                        format(date, "dd.MM.yyyy")
+                                    ) : (
+                                        <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="mr-2 h-4 w-4" />{" "}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Select date</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </fieldset>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0">

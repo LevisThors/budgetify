@@ -23,12 +23,15 @@ interface ObligatoryFormProps {
     changeActiveType?: (type: string) => void;
 }
 
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+
 const emptyObligation: ObligatoryType = {
     title: "",
     description: "",
     amount: 0,
-    first_payment_date: new Date(),
-    second_payment_date: new Date(),
+    first_payment_date: tomorrow,
+    second_payment_date: new Date(tomorrow),
 };
 
 export default function ObligatoryForm({

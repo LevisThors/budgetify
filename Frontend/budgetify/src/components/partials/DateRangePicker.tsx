@@ -13,6 +13,12 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "../ui/tooltip";
 
 export function DateRangePicker({
     className,
@@ -78,28 +84,47 @@ export function DateRangePicker({
                                 Payment Dates{" "}
                                 <span className="text-red-500">*</span>
                             </legend>
-                            <Button
-                                id="date"
-                                variant={"outline"}
-                                className={cn(
-                                    "w-full justify-between text-left font-normal flex border-none text-base",
-                                    !date && "text-muted-foreground"
-                                )}
-                            >
-                                {date?.from ? (
-                                    date.to ? (
-                                        <>
-                                            {format(date.from, "dd.MM.yyyy")} -{" "}
-                                            {format(date.to, "dd.MM.yyyy")}
-                                        </>
-                                    ) : (
-                                        format(date.from, "dd.MM.yyyy")
-                                    )
-                                ) : (
-                                    <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                            </Button>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            id="date"
+                                            variant={"outline"}
+                                            className={cn(
+                                                "w-full justify-between text-left font-normal flex border-none text-base",
+                                                !date && "text-muted-foreground"
+                                            )}
+                                        >
+                                            {date?.from ? (
+                                                date.to ? (
+                                                    <>
+                                                        {format(
+                                                            date.from,
+                                                            "dd.MM.yyyy"
+                                                        )}{" "}
+                                                        -{" "}
+                                                        {format(
+                                                            date.to,
+                                                            "dd.MM.yyyy"
+                                                        )}
+                                                    </>
+                                                ) : (
+                                                    format(
+                                                        date.from,
+                                                        "dd.MM.yyyy"
+                                                    )
+                                                )
+                                            ) : (
+                                                <span>Pick a date</span>
+                                            )}
+                                            <CalendarIcon className="mr-2 h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Select date range: from - to</p>
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </fieldset>
                     )}
                 </PopoverTrigger>

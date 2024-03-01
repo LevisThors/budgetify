@@ -29,11 +29,13 @@ class TransactionController extends Controller
 
             if (isset($request['query'])) {
                 $searchTerm = '%' . $request['query'] . '%';
-                $query->where('title', 'like', $searchTerm)
-                    ->orWhere('description', 'like', $searchTerm)
-                    ->orWhereHas('categories', function ($query) use ($searchTerm) {
-                        $query->where('title', 'like', $searchTerm);
-                    });;
+                $query->where(function ($query) use ($searchTerm) {
+                    $query->where('title', 'like', $searchTerm)
+                        ->orWhere('description', 'like', $searchTerm)
+                        ->orWhereHas('categories', function ($query) use ($searchTerm) {
+                            $query->where('title', 'like', $searchTerm);
+                        });
+                });
             }
 
             if (isset($request['sort'])) {
@@ -42,8 +44,6 @@ class TransactionController extends Controller
             } else {
                 $query->orderBy('payment_date', 'desc');
             }
-
-            // $transactions = $query->get();
 
             $transactions = $query->get()->map(function ($transaction) {
                 $transaction->documents = $transaction->getMedia()->map(function ($media) {
@@ -121,9 +121,11 @@ class TransactionController extends Controller
 
             if (isset($request->media)) {
                 foreach ($request->media as $file) {
-                    $transaction
-                        ->addMedia($file)
-                        ->toMediaCollection();
+                    if (is_file($file)) {
+                        $transaction
+                            ->addMedia($file)
+                            ->toMediaCollection();
+                    }
                 }
             }
 

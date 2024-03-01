@@ -239,6 +239,28 @@ function PiggyBankView({
         });
     };
 
+    const handleDelete = async (id: string) => {
+        fetch(PATHS.API.PROXY.PIGGY_BANK.DELETE(id), {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                Cookie: `laravel_session=${getCookie("laravel_session")}`,
+                "X-XSRF-TOKEN": getCookie("XSRF-TOKEN") || "",
+                "ngrok-skip-browser-warning": "69420",
+            },
+            credentials: "include",
+        }).then((res) => {
+            if (res.status === 200) {
+                revalidate();
+                toast({
+                    description: MESSAGE.SUCCESS.DELETE("Piggy Bank"),
+                    variant: "destructive",
+                });
+                closeRef?.current?.click();
+            }
+        });
+    };
+
     return (
         <div className="flex flex-col justify-between h-full">
             <div>
@@ -255,14 +277,23 @@ function PiggyBankView({
                                 height={36}
                             />
                         </button>
-                        <button>
-                            <Image
-                                src="/icons/delete.svg"
-                                alt="delete account"
-                                width={32}
-                                height={32}
+                        <Dialog>
+                            <DialogTrigger>
+                                <Image
+                                    src="/icons/delete.svg"
+                                    alt="delete subscripton"
+                                    width={36}
+                                    height={36}
+                                />
+                            </DialogTrigger>
+                            <DialogBody
+                                header="Delete Piggy Bank"
+                                body={MESSAGE.WARNING.DELETE("piggy bank")}
+                                onYes={() =>
+                                    handleDelete(piggyBank.id?.toString() || "")
+                                }
                             />
-                        </button>
+                        </Dialog>
                         <SheetClose ref={closeRef}>
                             <Image
                                 src="/icons/close.svg"
@@ -409,42 +440,67 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
     };
 
     return (
-        <div>
-            <Input
-                label="Goal"
-                name="goal"
-                value={piggyBank.goal}
-                disabled={true}
-                maxLength={128}
-            />
-            <Input
-                label="Goal Amount"
-                name="goal_amount"
-                type="number"
-                disabled={true}
-                value={piggyBank.goal_amount.toString()}
-            />
-            <Input
-                label="Amount to save"
-                name="amountToSave"
-                type="number"
-                value={formData.amountToSave.toString()}
-                onChange={handleChange}
-                required={true}
-            />
-            <DatePicker
-                onDateChange={handleDateChange}
-                originalDate={formData.date as Date}
-            />
-            <SheetFooter className="flex gap-4">
-                <SheetClose ref={closeRef}>Cancel</SheetClose>
-                <Button
-                    onClick={handleSubmit}
-                    text="Save"
-                    className="text-red px-5"
-                    active={isFormValid()}
-                />
-            </SheetFooter>
-        </div>
+        <>
+            <SheetHeader className="flex flex-row justify-between items-center">
+                <h1 className="text-2xl">{MESSAGE.BUTTON.ADD("Piggy Bank")}</h1>
+                <div>
+                    <SheetClose>
+                        <Image
+                            src="/icons/close.svg"
+                            alt="close"
+                            width={35}
+                            height={35}
+                        />
+                    </SheetClose>
+                </div>
+            </SheetHeader>
+            <div className="flex flex-col h-[95%] justify-between">
+                <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-1">
+                        {error && (
+                            <div className="w-full p-2 bg-red-500 bg-opacity-50 text-authBlack flex justify-between text-sm rounded-md">
+                                <span>{error}</span>
+                                <button onClick={() => setError("")}>X</button>
+                            </div>
+                        )}
+                        <Input
+                            label="Goal"
+                            name="goal"
+                            value={piggyBank.goal}
+                            disabled={true}
+                            maxLength={128}
+                        />
+                    </div>
+                    <Input
+                        label="Goal Amount"
+                        name="goal_amount"
+                        type="number"
+                        disabled={true}
+                        value={piggyBank.goal_amount.toString()}
+                    />
+                    <Input
+                        label="Amount to save"
+                        name="amountToSave"
+                        type="number"
+                        value={formData.amountToSave.toString()}
+                        onChange={handleChange}
+                        required={true}
+                    />
+                    <DatePicker
+                        onDateChange={handleDateChange}
+                        originalDate={formData.date as Date}
+                    />
+                </div>
+                <SheetFooter className="flex gap-4">
+                    <SheetClose ref={closeRef}>Cancel</SheetClose>
+                    <Button
+                        onClick={handleSubmit}
+                        text="Save"
+                        className="text-red px-5"
+                        active={isFormValid()}
+                    />
+                </SheetFooter>
+            </div>
+        </>
     );
 }
