@@ -21,6 +21,13 @@ export default function BarChart({
     const values = Object.values(categoryStatistics);
     Chart.register(LinearScale, BarController, CategoryScale, BarElement);
 
+    const getRandomColor = () => {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        return `rgb(${r},${g},${b}, 0.6)`;
+    };
+
     useEffect(() => {
         if (chartInstance.current) {
             chartInstance.current.destroy();
@@ -35,6 +42,7 @@ export default function BarChart({
                     {
                         label: "# of Votes",
                         data: values,
+                        backgroundColor: values.map(() => getRandomColor()),
                         borderWidth: 1,
                     },
                 ],

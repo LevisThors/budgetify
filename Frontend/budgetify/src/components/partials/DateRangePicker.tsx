@@ -32,8 +32,10 @@ export function DateRangePicker({
     originalDate?: DateRange | undefined;
 }) {
     const [date, setDate] = React.useState<DateRange | undefined>({
-        from: originalDate?.from || new Date(),
-        to: originalDate?.to || undefined,
+        from:
+            originalDate?.from ||
+            new Date(new Date().setMonth(new Date().getMonth() - 5)),
+        to: originalDate?.to || new Date(),
     });
 
     React.useEffect(() => {

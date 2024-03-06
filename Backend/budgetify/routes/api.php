@@ -36,6 +36,7 @@ Route::middleware("web")->group(function () {
         Route::delete('/categories/{id}', [CategoryController::class, 'delete']);
         Route::put('/categories/{id}', [CategoryController::class, 'update']);
         Route::get('/categories/statistics', [CategoryController::class, 'getStatistics']);
+        Route::get('/categories/monthly_statistics', [CategoryController::class, 'getMonthlyStatistics']);
 
         Route::get('/transactions', [TransactionController::class, 'getAll']);
         Route::put('/transactions/{id}', [TransactionController::class, 'update']);

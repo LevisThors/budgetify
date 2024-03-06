@@ -64,6 +64,12 @@ const PATHS = {
             USER: {
                 GET: "/backend/api/user",
             },
+            STATISTIC: {
+                DOWNLOAD_CATEGORY: (accountId: string) =>
+                    `/backend/api/categories/statistics?download=true&account_id=${accountId}`,
+                DOWNLOAD_MONTHLY: (accountId: string) =>
+                    `/backend/api/categories/monthly_statistics?download=true&account_id=${accountId}`,
+            },
         },
         BASE: {
             USER: {
@@ -89,6 +95,9 @@ const PATHS = {
             },
             CATEGORY_STATISTICS: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories/statistics`,
+            },
+            MONTHLY_STATISTICS: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories/monthly_statistics`,
             },
         },
     },

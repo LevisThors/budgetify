@@ -46,7 +46,7 @@ export function DataTable({
                             {value} {currencyToSymbol(currency)}
                         </TableCell>
                         <TableCell className="h-fit py-1">
-                            {(value / totalSpent) * 100}%
+                            {((value / totalSpent) * 100).toFixed(2)}%
                         </TableCell>
                     </TableRow>
                 ))}
