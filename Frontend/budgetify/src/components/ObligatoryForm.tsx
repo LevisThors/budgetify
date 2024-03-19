@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToast } from "./ui/use-toast";
 import PATHS from "@/paths";
 import { getCookie } from "cookies-next";
@@ -16,6 +16,7 @@ import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { useLoading } from "@/context/Loading";
 import { ObligatoryType } from "@/type/ObligatoryType";
+import { useParams } from "next/navigation";
 
 interface ObligatoryFormProps {
     type: string;
@@ -39,9 +40,36 @@ export default function ObligatoryForm({
     obligatory,
     changeActiveType,
 }: ObligatoryFormProps) {
+    const [inputFields, setInputFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const [obligatoryFields, setObligatoryFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setObligatoryFields(messageData.Obligatory);
+            setInputFields(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
     switch (type) {
         case "view":
-            return obligatory && <ObligatoryViewForm obligatory={obligatory} />;
+            return (
+                obligatory && (
+                    <ObligatoryViewForm
+                        obligatory={obligatory}
+                        t={{ ...inputFields, ...obligatoryFields }}
+                    />
+                )
+            );
         case "edit":
             return (
                 obligatory && (
@@ -49,17 +77,36 @@ export default function ObligatoryForm({
                         type="edit"
                         obligatory={obligatory}
                         changeActiveType={changeActiveType}
+                        t={{ ...inputFields, ...obligatoryFields }}
                     />
                 )
             );
         case "create":
-            return <ObligatoryCreateForm type="create" />;
+            return (
+                <ObligatoryCreateForm
+                    type="create"
+                    t={{ ...inputFields, ...obligatoryFields }}
+                />
+            );
         default:
-            return obligatory && <ObligatoryViewForm obligatory={obligatory} />;
+            return (
+                obligatory && (
+                    <ObligatoryViewForm
+                        obligatory={obligatory}
+                        t={{ ...inputFields, ...obligatoryFields }}
+                    />
+                )
+            );
     }
 }
 
-function ObligatoryViewForm({ obligatory }: { obligatory: ObligatoryType }) {
+function ObligatoryViewForm({
+    obligatory,
+    t,
+}: {
+    obligatory: ObligatoryType;
+    t: any;
+}) {
     return (
         <div className="h-[95%] flex flex-col justify-between">
             <div className="flex flex-col gap-4">
@@ -77,7 +124,9 @@ function ObligatoryViewForm({ obligatory }: { obligatory: ObligatoryType }) {
                 </div>
                 <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Payment Dates:</span>
+                        <span className="w-1/3 font-bold">
+                            {t.paymentDates}:
+                        </span>
                         <span className="w-2/3">
                             {obligatory.first_payment_date.toString()}{" "}
                             {obligatory.second_payment_date &&
@@ -87,7 +136,7 @@ function ObligatoryViewForm({ obligatory }: { obligatory: ObligatoryType }) {
                     {obligatory.description && (
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
                             <span className="w-1/3 font-bold">
-                                Description:
+                                {t.description}:
                             </span>
                             <span className="w-2/3">
                                 {obligatory.description}
@@ -97,7 +146,7 @@ function ObligatoryViewForm({ obligatory }: { obligatory: ObligatoryType }) {
                 </div>
             </div>
             <SheetFooter>
-                <SheetClose className="text-lg">Close</SheetClose>
+                <SheetClose className="text-lg">{t.close}</SheetClose>
             </SheetFooter>
         </div>
     );
@@ -107,10 +156,12 @@ function ObligatoryCreateForm({
     type,
     obligatory,
     changeActiveType,
+    t,
 }: {
     type: string;
     obligatory?: ObligatoryType;
     changeActiveType?: (type: string) => void;
+    t: any;
 }) {
     const [formData, setFormData] = useState(
         obligatory ? obligatory : emptyObligation
@@ -152,7 +203,7 @@ function ObligatoryCreateForm({
     };
 
     const handleInactive = () => {
-        setError(MESSAGE.ERROR.FILL_REQUIRED);
+        setError(t.fillReq);
     };
 
     const isFormValid = () => {
@@ -208,20 +259,20 @@ function ObligatoryCreateForm({
                         if (changeActiveType) changeActiveType("view");
                         setLoadingStates({ ...loadingStates, [item.id]: true });
                         toast({
-                            description: MESSAGE.SUCCESS.UPDATE("Obligatory"),
+                            description: t.update,
                         });
                     } else {
                         toast({
-                            description: MESSAGE.SUCCESS.CREATION("Obligatory"),
+                            description: t.create,
                         });
                     }
                 }
                 if (res.status === 400) {
                     const { message } = await res.json();
                     if (message === "Insufficient funds") {
-                        setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                        setError(t.insFunds);
                     } else if (message === "Invalid date") {
-                        setError(MESSAGE.ERROR.INVALID_DATE);
+                        setError(t.invalidDate);
                     }
                 }
             });
@@ -240,7 +291,7 @@ function ObligatoryCreateForm({
                     )}
                 </div>
                 <Input
-                    label="Title"
+                    label={t.title}
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
@@ -248,18 +299,18 @@ function ObligatoryCreateForm({
                     maxLength={128}
                 />
                 <Input
-                    label="Amount"
+                    label={t.amount}
                     name="amount"
                     type="number"
-                    value={formData.amount.toString()}
+                    value={formData.amount?.toString()}
                     onChange={handleChange}
                 />
                 <Input
-                    label="Frequency"
+                    label={t.frequency}
                     name="frequency"
                     type="select"
-                    options={["Monthly"]}
-                    value={"Monthly"}
+                    options={[t.monthly]}
+                    value={t.monthly}
                 />
                 <DateRangePicker
                     onDateChange={handleDateChange}
@@ -269,7 +320,7 @@ function ObligatoryCreateForm({
                     }}
                 />
                 <Input
-                    label="Description"
+                    label={t.description}
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
@@ -279,18 +330,18 @@ function ObligatoryCreateForm({
             <SheetFooter className="flex gap-4">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button>Cancel</button>
+                        <button>{t.cancel}</button>
                     </DialogTrigger>
                     <DialogBody
-                        header="Cancel Obligatory"
-                        body={MESSAGE.WARNING.CANCEL("obligatory")}
+                        header={t.cancelH}
+                        body={t.cancelM}
                         onYes={() => closeRef.current?.click()}
                     />
                 </Dialog>
                 <Button
                     onClick={handleSubmit}
                     onInactiveClick={handleInactive}
-                    text="Save"
+                    text={t.save}
                     className="text-red px-5"
                     active={isFormValid()}
                 />

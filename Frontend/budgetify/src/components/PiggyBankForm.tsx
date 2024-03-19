@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { toast, useToast } from "./ui/use-toast";
 import { PiggyBankType } from "@/type/PiggyBankType";
 import Button from "./partials/Button";
@@ -39,16 +39,43 @@ export default function PiggyBankForm({
     const handleChangeType = (type: string) => {
         setActiveType(type);
     };
+    const params = useParams();
+    const [piggyBankMessages, setPiggyBankMessages] = useState<{
+        [key: string]: string;
+    }>({});
+    const [inputFields, setInputFields] = useState<{
+        [key: string]: string;
+    }>({});
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setPiggyBankMessages(messageData.PiggyBank);
+            setInputFields(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     switch (activeType) {
         case "add":
-            return <PiggyBankAdd type="add" />;
+            return (
+                <PiggyBankAdd
+                    type="add"
+                    inputT={inputFields}
+                    t={piggyBankMessages}
+                />
+            );
         case "edit":
             return (
                 <PiggyBankAdd
                     type="edit"
                     piggyBank={piggyBank}
                     changeActiveType={handleChangeType}
+                    inputT={inputFields}
+                    t={piggyBankMessages}
                 />
             );
         case "view":
@@ -57,16 +84,27 @@ export default function PiggyBankForm({
                     <PiggyBankView
                         piggyBank={piggyBank}
                         onTypeChange={handleChangeType}
+                        inputT={inputFields}
+                        t={piggyBankMessages}
                     />
                 );
         case "addMoney":
-            if (piggyBank) return <PiggyBankAddMoney piggyBank={piggyBank} />;
+            if (piggyBank)
+                return (
+                    <PiggyBankAddMoney
+                        piggyBank={piggyBank}
+                        inputT={inputFields}
+                        t={piggyBankMessages}
+                    />
+                );
         default:
             if (piggyBank)
                 return (
                     <PiggyBankView
                         piggyBank={piggyBank}
                         onTypeChange={handleChangeType}
+                        inputT={inputFields}
+                        t={piggyBankMessages}
                     />
                 );
     }
@@ -76,10 +114,14 @@ function PiggyBankAdd({
     type,
     piggyBank,
     changeActiveType,
+    inputT,
+    t,
 }: {
     type: string;
     piggyBank?: PiggyBankType;
     changeActiveType?: (type: string) => void;
+    inputT: any;
+    t: any;
 }) {
     const [formData, setFormData] = useState(piggyBank || emptyPiggyBank);
     const [error, setError] = useState<string>("");
@@ -138,16 +180,16 @@ function PiggyBankAdd({
                     if (type === "edit") {
                         if (changeActiveType) changeActiveType("view");
                         toast({
-                            description: MESSAGE.SUCCESS.UPDATE("Piggy Bank"),
+                            description: t.update,
                         });
                     } else {
                         toast({
-                            description: MESSAGE.SUCCESS.CREATION("Piggy Bank"),
+                            description: t.create,
                         });
                     }
                 }
                 if (res.status === 400) {
-                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                    setError(t.insFunds);
                 }
             });
         }
@@ -156,7 +198,7 @@ function PiggyBankAdd({
     return (
         <>
             <SheetHeader className="flex flex-row justify-between items-center">
-                <h1 className="text-2xl">{MESSAGE.BUTTON.ADD("Piggy Bank")}</h1>
+                <h1 className="text-2xl">{t.add}</h1>
                 <div>
                     <SheetClose>
                         <Image
@@ -178,7 +220,7 @@ function PiggyBankAdd({
                             </div>
                         )}
                         <Input
-                            label="Goal"
+                            label={inputT.goal}
                             name="goal"
                             value={formData.goal}
                             onChange={handleChange}
@@ -187,7 +229,7 @@ function PiggyBankAdd({
                         />
                     </div>
                     <Input
-                        label="Goal Amount"
+                        label={inputT.goalAmount}
                         name="goal_amount"
                         type="number"
                         value={formData.goal_amount.toString()}
@@ -196,10 +238,10 @@ function PiggyBankAdd({
                     />
                 </div>
                 <SheetFooter className="flex gap-4">
-                    <SheetClose ref={closeRef}>Cancel</SheetClose>
+                    <SheetClose ref={closeRef}>{inputT.cancel}</SheetClose>
                     <Button
                         onClick={handleSubmit}
-                        text="Save"
+                        text={inputT.save}
                         className="text-red px-5"
                         active={isFormValid()}
                     />
@@ -212,9 +254,13 @@ function PiggyBankAdd({
 function PiggyBankView({
     piggyBank,
     onTypeChange,
+    t,
+    inputT,
 }: {
     piggyBank: PiggyBankType;
     onTypeChange: (type: string) => void;
+    inputT: any;
+    t: any;
 }) {
     const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -233,7 +279,7 @@ function PiggyBankView({
                 revalidate();
                 closeRef?.current?.click();
                 toast({
-                    description: MESSAGE.SUCCESS.CRASH("Piggy Bank"),
+                    description: t.crash,
                 });
             }
         });
@@ -253,7 +299,7 @@ function PiggyBankView({
             if (res.status === 200) {
                 revalidate();
                 toast({
-                    description: MESSAGE.SUCCESS.DELETE("Piggy Bank"),
+                    description: t.delete,
                     variant: "destructive",
                 });
                 closeRef?.current?.click();
@@ -265,9 +311,7 @@ function PiggyBankView({
         <div className="flex flex-col justify-between h-full">
             <div>
                 <SheetHeader className="flex flex-row justify-between items-center">
-                    <h1 className="text-2xl">
-                        {MESSAGE.HEADER.INFORMATION("Piggy Bank")}
-                    </h1>
+                    <h1 className="text-2xl">{t.header}</h1>
                     <div>
                         <button onClick={() => onTypeChange("edit")}>
                             <Image
@@ -288,7 +332,7 @@ function PiggyBankView({
                             </DialogTrigger>
                             <DialogBody
                                 header="Delete Piggy Bank"
-                                body={MESSAGE.WARNING.DELETE("piggy bank")}
+                                body={t.deleteQ}
                                 onYes={() =>
                                     handleDelete(piggyBank.id?.toString() || "")
                                 }
@@ -321,12 +365,14 @@ function PiggyBankView({
                     </div>
                     <div>
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                            <span className="w-1/3 font-bold">Goal:</span>
+                            <span className="w-1/3 font-bold">
+                                {inputT.goal}:
+                            </span>
                             <span className="w-2/3">{piggyBank.goal}</span>
                         </div>
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
                             <span className="w-1/3 font-bold">
-                                Goal Amount:
+                                {inputT.goalAmount}:
                             </span>
                             <span className="w-2/3">
                                 {piggyBank.goal_amount}{" "}
@@ -335,7 +381,7 @@ function PiggyBankView({
                         </div>
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
                             <span className="w-1/3 font-bold">
-                                Saved Amount:
+                                {inputT.savedAmount}:
                             </span>
                             <span className="w-2/3">
                                 {piggyBank.saved_amount}{" "}
@@ -355,25 +401,33 @@ function PiggyBankView({
                                         loading="eager"
                                     />
                                 </span>
-                                <span className="pr-3">Crash</span>
+                                <span className="pr-3">{t.crash}</span>
                             </div>
                         </DialogTrigger>
                         <DialogBody
                             header="Delete Account"
-                            body={MESSAGE.WARNING.DELETE("Account")}
+                            body={t.delete}
                             onYes={() => handleCrash()}
                         />
                     </Dialog>
                 </div>
             </div>
             <SheetFooter>
-                <SheetClose className="text-lg">Close</SheetClose>
+                <SheetClose className="text-lg">{inputT.close}</SheetClose>
             </SheetFooter>
         </div>
     );
 }
 
-function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
+function PiggyBankAddMoney({
+    piggyBank,
+    t,
+    inputT,
+}: {
+    piggyBank: PiggyBankType;
+    t: any;
+    inputT: any;
+}) {
     const [formData, setFormData] = useState<{
         amountToSave: number;
         date: Date | string | undefined;
@@ -429,11 +483,11 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                     revalidate();
                     closeRef?.current?.click();
                     toast({
-                        description: MESSAGE.SUCCESS.UPDATE("Piggy Bank"),
+                        description: t.update,
                     });
                 }
                 if (res.status === 400) {
-                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                    t.insFunds;
                 }
             });
         }
@@ -442,7 +496,7 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
     return (
         <>
             <SheetHeader className="flex flex-row justify-between items-center">
-                <h1 className="text-2xl">{MESSAGE.BUTTON.ADD("Piggy Bank")}</h1>
+                <h1 className="text-2xl">{t.add}</h1>
                 <div>
                     <SheetClose>
                         <Image
@@ -464,7 +518,7 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                             </div>
                         )}
                         <Input
-                            label="Goal"
+                            label={inputT.goal}
                             name="goal"
                             value={piggyBank.goal}
                             disabled={true}
@@ -472,14 +526,14 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                         />
                     </div>
                     <Input
-                        label="Goal Amount"
+                        label={inputT.goalAmount}
                         name="goal_amount"
                         type="number"
                         disabled={true}
                         value={piggyBank.goal_amount.toString()}
                     />
                     <Input
-                        label="Amount to save"
+                        label={inputT.amountToSave}
                         name="amountToSave"
                         type="number"
                         value={formData.amountToSave.toString()}
@@ -492,10 +546,10 @@ function PiggyBankAddMoney({ piggyBank }: { piggyBank: PiggyBankType }) {
                     />
                 </div>
                 <SheetFooter className="flex gap-4">
-                    <SheetClose ref={closeRef}>Cancel</SheetClose>
+                    <SheetClose ref={closeRef}>{inputT.cancel}</SheetClose>
                     <Button
                         onClick={handleSubmit}
-                        text="Save"
+                        text={inputT.save}
                         className="text-red px-5"
                         active={isFormValid()}
                     />

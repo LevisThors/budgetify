@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Space_Grotesk } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 
-import "./globals.css";
+import "../globals.css";
 
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 
@@ -13,11 +13,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
     children,
+    params,
 }: Readonly<{
     children: React.ReactNode;
+    params: {
+        locale: string;
+    };
 }>) {
     return (
-        <html lang="en">
+        <html lang={params.locale}>
             <body className={spaceGrotesk.className}>
                 {children}
                 <Toaster />

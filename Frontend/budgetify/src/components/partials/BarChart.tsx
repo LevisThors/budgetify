@@ -52,7 +52,7 @@ export default function BarChart({
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            stepSize: 10,
+                            stepSize: 100,
                         },
                         grid: {
                             display: false,
@@ -70,7 +70,7 @@ export default function BarChart({
         if (chart.current) {
             chartInstance.current = new Chart(chart.current, config);
         }
-    }, [labels, values]);
+    }, []);
 
     return (
         <div>

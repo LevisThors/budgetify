@@ -1,6 +1,8 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 interface AuthInputProps {
     type: string;
@@ -24,6 +26,19 @@ export default function AuthInput({
     const [isFocused, setIsFocused] = useState(false);
     const [throwRequired, setThrowRequired] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [message, setMessage] = useState<any>(null); // Adjust the type accordingly
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setMessage(messageData);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     const handleBlur = () => {
         setIsFocused(false);
@@ -83,7 +98,7 @@ export default function AuthInput({
             <div>
                 {(throwRequired || error) && (
                     <span className="text-xs text-red-500">
-                        {error ? error : "Required field is empty"}
+                        {error ? error : message.Auth.fillReq}
                     </span>
                 )}
             </div>

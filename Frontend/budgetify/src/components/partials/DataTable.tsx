@@ -14,9 +14,11 @@ import currencyToSymbol from "@/util/currencyToSymbol";
 export function DataTable({
     categoryStatistics,
     currency,
+    headerTranslations,
 }: {
     categoryStatistics: Record<string, number>;
     currency: string;
+    headerTranslations: any;
 }) {
     const totalSpent = Object.entries(categoryStatistics).reduce(
         (acc, [_, value]: any) => {
@@ -30,10 +32,14 @@ export function DataTable({
             <TableHeader className="bg-[#D5F1EC] text-base">
                 <TableRow>
                     <TableHead className="w-[100px] h-fit py-1">
-                        Category
+                        {headerTranslations.category}
                     </TableHead>
-                    <TableHead className="h-fit py-1">Amount</TableHead>
-                    <TableHead className="h-fit py-1">% in total</TableHead>
+                    <TableHead className="h-fit py-1">
+                        {headerTranslations.amount}
+                    </TableHead>
+                    <TableHead className="h-fit py-1">
+                        {headerTranslations.total}
+                    </TableHead>
                 </TableRow>
             </TableHeader>
             <TableBody>

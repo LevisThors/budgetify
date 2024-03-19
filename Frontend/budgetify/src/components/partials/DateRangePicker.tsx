@@ -1,10 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { addDays, format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
-
+import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -19,6 +18,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "../ui/tooltip";
+import { useParams } from "next/navigation";
 
 export function DateRangePicker({
     className,
@@ -31,16 +31,32 @@ export function DateRangePicker({
     onDateChange: (date: DateRange | undefined) => void;
     originalDate?: DateRange | undefined;
 }) {
-    const [date, setDate] = React.useState<DateRange | undefined>({
+    const [date, setDate] = useState<DateRange | undefined>({
         from:
             originalDate?.from ||
             new Date(new Date().setMonth(new Date().getMonth() - 5)),
         to: originalDate?.to || new Date(),
     });
+    const params = useParams();
 
-    React.useEffect(() => {
+    const [t, setT] = useState<{
+        [key: string]: string;
+    }>({});
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setT(messageData.Statistics);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
+    useEffect(() => {
         onDateChange(date);
-    }, [date, onDateChange]);
+    }, []);
 
     return (
         <div className={cn("grid gap-2", className)}>
@@ -58,7 +74,7 @@ export function DateRangePicker({
                             >
                                 <div className="flex flex-col">
                                     <span className="text-xs text-gray-400">
-                                        Date Range{" "}
+                                        {t.dateRange}{" "}
                                     </span>
                                     {date?.from ? (
                                         date.to ? (
@@ -83,7 +99,7 @@ export function DateRangePicker({
                     ) : (
                         <fieldset className="border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2">
                             <legend className="text-sm ms-2 px-1 text-gray-400">
-                                Payment Dates{" "}
+                                {t.dateRange}{" "}
                                 <span className="text-red-500">*</span>
                             </legend>
                             <TooltipProvider>

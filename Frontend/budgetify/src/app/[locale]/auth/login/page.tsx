@@ -3,13 +3,20 @@ import { Suspense } from "react";
 import { getUserData } from "@/util/getUserData";
 import { redirect } from "next/navigation";
 import PATHS from "@/paths";
+import { getTranslations } from "next-intl/server";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+    params,
+}: {
+    params: { locale: string };
+}) {
     try {
         const userData = await getUserData();
 
-        if (userData) redirect(PATHS.PAGES().HOME);
+        if (userData) redirect(`${params.locale}/${PATHS.PAGES().HOME}`);
     } catch (error) {}
+
+    const t = await getTranslations("Auth");
 
     return (
         <section
@@ -17,7 +24,7 @@ export default async function LoginPage() {
             style={{ backgroundImage: "url('/images/piggyWallpaper.svg')" }}
         >
             <Suspense>
-                <Login />
+                <Login errorMessage={t("invalid")} />
             </Suspense>
         </section>
     );

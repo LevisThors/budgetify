@@ -9,8 +9,12 @@ const NavBar = dynamic(() => import("@/components/NavBar"), {
 
 export default function DashboardLayout({
     children,
+    params,
 }: Readonly<{
     children: React.ReactNode;
+    params: {
+        locale: string;
+    };
 }>) {
     return (
         <>

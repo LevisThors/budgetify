@@ -18,6 +18,7 @@ import { DateRangePicker } from "./partials/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { useLoading } from "@/context/Loading";
+import { useParams } from "next/navigation";
 
 interface SubscriptionFormProps {
     type: string;
@@ -39,11 +40,34 @@ export default function SubscriptionForm({
     subscription,
     changeActiveType,
 }: SubscriptionFormProps) {
+    const [inputFields, setInputFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const [subscriptionFields, setSubscriptionFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setSubscriptionFields(messageData.Subscription);
+            setInputFields(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
     switch (type) {
         case "view":
             return (
                 subscription && (
-                    <SubscriptionViewForm subscription={subscription} />
+                    <SubscriptionViewForm
+                        subscription={subscription}
+                        t={{ ...inputFields, ...subscriptionFields }}
+                    />
                 )
             );
         case "edit":
@@ -53,15 +77,24 @@ export default function SubscriptionForm({
                         type="edit"
                         subscription={subscription}
                         changeActiveType={changeActiveType}
+                        t={{ ...inputFields, ...subscriptionFields }}
                     />
                 )
             );
         case "create":
-            return <SubscriptionCreateForm type="create" />;
+            return (
+                <SubscriptionCreateForm
+                    type="create"
+                    t={{ ...inputFields, ...subscriptionFields }}
+                />
+            );
         default:
             return (
                 subscription && (
-                    <SubscriptionViewForm subscription={subscription} />
+                    <SubscriptionViewForm
+                        subscription={subscription}
+                        t={{ ...inputFields, ...subscriptionFields }}
+                    />
                 )
             );
     }
@@ -69,8 +102,10 @@ export default function SubscriptionForm({
 
 function SubscriptionViewForm({
     subscription,
+    t,
 }: {
     subscription: SubscriptionType;
+    t: any;
 }) {
     return (
         <div className="h-[95%] flex flex-col justify-between">
@@ -95,7 +130,9 @@ function SubscriptionViewForm({
                 </div>
                 <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Payment Date:</span>
+                        <span className="w-1/3 font-bold">
+                            {t.paymentDate}:
+                        </span>
                         <span className="w-2/3">
                             {subscription.first_payment_date.toString()}{" "}
                             {subscription.second_payment_date &&
@@ -105,7 +142,7 @@ function SubscriptionViewForm({
                     {subscription.description && (
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
                             <span className="w-1/3 font-bold">
-                                Description:
+                                {t.description}:
                             </span>
                             <span className="w-2/3">
                                 {subscription.description}
@@ -115,7 +152,7 @@ function SubscriptionViewForm({
                 </div>
             </div>
             <SheetFooter>
-                <SheetClose className="text-lg">Close</SheetClose>
+                <SheetClose className="text-lg">{t.close}</SheetClose>
             </SheetFooter>
         </div>
     );
@@ -125,10 +162,12 @@ function SubscriptionCreateForm({
     type,
     subscription,
     changeActiveType,
+    t,
 }: {
     type: string;
     subscription?: SubscriptionType;
     changeActiveType?: (type: string) => void;
+    t: any;
 }) {
     const [formData, setFormData] = useState(
         subscription ? subscription : emptySubscription
@@ -216,7 +255,7 @@ function SubscriptionCreateForm({
     };
 
     const handleInactive = () => {
-        setError(MESSAGE.ERROR.FILL_REQUIRED);
+        setError(t.fillReq);
     };
 
     const isFormValid = () => {
@@ -277,21 +316,20 @@ function SubscriptionCreateForm({
                         if (changeActiveType) changeActiveType("view");
                         setLoadingStates({ ...loadingStates, [item.id]: true });
                         toast({
-                            description: MESSAGE.SUCCESS.UPDATE("Subscription"),
+                            description: t.update,
                         });
                     } else {
                         toast({
-                            description:
-                                MESSAGE.SUCCESS.CREATION("Subscription"),
+                            description: t.create,
                         });
                     }
                 }
                 if (res.status === 400) {
                     const { message } = await res.json();
                     if (message === "Insufficient funds") {
-                        setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                        setError(t.insFunds);
                     } else if (message === "Invalid date") {
-                        setError(MESSAGE.ERROR.INVALID_DATE);
+                        setError(t.invalidDate);
                     }
                 }
             });
@@ -310,7 +348,7 @@ function SubscriptionCreateForm({
                     )}
                 </div>
                 <Input
-                    label="Title"
+                    label={t.title}
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
@@ -319,7 +357,7 @@ function SubscriptionCreateForm({
                 />
                 {categories && (
                     <MultiSelect
-                        label="Categories"
+                        label={t.categories}
                         categories={categories["Expenses"]}
                         refetch={refetchCategories}
                         selected={formData.categories}
@@ -328,7 +366,7 @@ function SubscriptionCreateForm({
                     />
                 )}
                 <Input
-                    label="Amount"
+                    label={t.amount}
                     name="amount"
                     type="number"
                     value={formData.amount.toString()}
@@ -344,7 +382,7 @@ function SubscriptionCreateForm({
                 />
 
                 <Input
-                    label="Description"
+                    label={t.description}
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
@@ -354,18 +392,18 @@ function SubscriptionCreateForm({
             <SheetFooter className="flex gap-4">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button>Cancel</button>
+                        <button>{t.cancel}</button>
                     </DialogTrigger>
                     <DialogBody
-                        header="Cancel Subscription"
-                        body={MESSAGE.WARNING.CANCEL("subscription")}
+                        header={t.cancelH}
+                        body={t.cancelM}
                         onYes={() => closeRef.current?.click()}
                     />
                 </Dialog>
                 <Button
                     onClick={handleSubmit}
                     onInactiveClick={handleInactive}
-                    text="Save"
+                    text={t.save}
                     className="text-red px-5"
                     active={isFormValid()}
                 />

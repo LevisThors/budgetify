@@ -10,7 +10,9 @@ export default function ActionButton({
     needsAccount?: boolean;
 }) {
     const [hasActiveAccount, setHasActiveAccount] = useState(false);
-    const isAdd = text.split(" ")[0].toLowerCase() === "add";
+    const isAdd =
+        text.split(" ")[0].toLowerCase() === "add" ||
+        text.split(" ")[1] === "დამატება";
 
     useEffect(() => {
         if (needsAccount) {

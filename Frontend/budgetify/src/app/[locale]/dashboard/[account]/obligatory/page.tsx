@@ -17,13 +17,17 @@ import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import SubscriptionForm from "@/components/SubscriptionsForm";
-import MESSAGE from "@/messages";
 import { SubscriptionType } from "@/type/SubscriptionType";
+import ObligatoryForm from "@/components/ObligatoryForm";
 import { LoadingProvider } from "@/context/Loading";
+import { ObligatoryType } from "@/type/ObligatoryType";
+import { useMessages, useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
-interface SubscriptionsPageProps {
+interface ObligatoriesPageProps {
     params: {
         account: string;
+        locale: string;
     };
     searchParams?: {
         query?: string;
@@ -32,12 +36,12 @@ interface SubscriptionsPageProps {
     };
 }
 
-async function getSubscriptions(
+async function getObligatories(
     accountId: string,
     searchParams: { query?: string; type?: string; sort?: string } | null
 ) {
     const response = await fetch(
-        `${PATHS.API.BASE.SUBSCRIPTION.GET}?account_id=${accountId}${
+        `${PATHS.API.BASE.OBLIGATORY.GET}?account_id=${accountId}${
             searchParams?.query ? `&query=${searchParams.query}` : ""
         }${searchParams?.type ? `&type=${searchParams.type}` : ""}${
             searchParams?.sort ? `&sort=${searchParams.sort}` : ""
@@ -75,11 +79,11 @@ const getCategories = async (accountId: string) => {
     return res.json();
 };
 
-export default async function SubscriptionsPage({
+export default async function ObligatoriesPage({
     params,
     searchParams,
-}: SubscriptionsPageProps) {
-    const subscriptionsData = await getSubscriptions(
+}: ObligatoriesPageProps) {
+    const obligatoriesData = await getObligatories(
         params?.account,
         searchParams || null
     );
@@ -87,6 +91,8 @@ export default async function SubscriptionsPage({
     const category = await getCategories(params.account);
     const hasCategories =
         category.Expenses.length > 0 || category.Income.length > 0;
+    const t = await getTranslations("Obligatory");
+    const transactionMessage = await getTranslations("Transaction");
 
     return (
         <section className="flex w-full justify-between h-full">
@@ -98,16 +104,16 @@ export default async function SubscriptionsPage({
                 <Suspense>
                     <ScrollArea>
                         <div className="max-h-[75vh] flex flex-col gap-5">
-                            {subscriptionsData?.message !== "Empty account" ? (
-                                subscriptionsData?.subscriptions?.map(
-                                    (subscription: SubscriptionType) => (
-                                        <LoadingProvider key={subscription.id}>
+                            {obligatoriesData?.message !== "Empty account" ? (
+                                obligatoriesData?.obligatories?.map(
+                                    (obligatory: ObligatoryType) => (
+                                        <LoadingProvider key={obligatory.id}>
                                             <Card
-                                                key={subscription.id}
-                                                transaction={subscription}
-                                                page="subscriptions"
+                                                key={obligatory.id}
+                                                transaction={obligatory}
+                                                page="obligatories"
                                                 currency={currencyToSymbol(
-                                                    subscriptionsData.currency
+                                                    obligatoriesData.currency
                                                 )}
                                             />
                                         </LoadingProvider>
@@ -115,7 +121,7 @@ export default async function SubscriptionsPage({
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    {MESSAGE.ERROR.NOT_FOUND("Subscriptions")}
+                                    {t("notFound")}
                                 </span>
                             )}
                         </div>
@@ -127,15 +133,11 @@ export default async function SubscriptionsPage({
                     <Suspense fallback="loading">
                         <Sheet>
                             <SheetTrigger>
-                                <ActionButton
-                                    text={MESSAGE.BUTTON.ADD("Subscription")}
-                                />
+                                <ActionButton text={t("add")} />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
-                                    <h1 className="text-2xl">
-                                        {MESSAGE.BUTTON.ADD("Subscription")}
-                                    </h1>
+                                    <h1 className="text-2xl">{t("add")}</h1>
                                     <div>
                                         <SheetClose>
                                             <Image
@@ -148,7 +150,7 @@ export default async function SubscriptionsPage({
                                     </div>
                                 </SheetHeader>
                                 <LoadingProvider>
-                                    <SubscriptionForm type="create" />
+                                    <ObligatoryForm type="create" />
                                 </LoadingProvider>
                             </SheetContent>
                         </Sheet>
@@ -156,7 +158,7 @@ export default async function SubscriptionsPage({
                             {hasCategories && (
                                 <SheetTrigger>
                                     <ActionButton
-                                        text={MESSAGE.BUTTON.ADD("Transaction")}
+                                        text={transactionMessage("add")}
                                         needsAccount={true}
                                     />
                                 </SheetTrigger>
@@ -164,7 +166,7 @@ export default async function SubscriptionsPage({
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">
-                                        {MESSAGE.BUTTON.ADD("Transaction")}
+                                        {transactionMessage("add")}
                                     </h1>
                                     <div>
                                         <SheetClose>

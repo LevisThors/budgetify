@@ -3,22 +3,22 @@
 import AuthInput from "@/components/partials/AuthInput";
 import Button from "@/components/partials/Button";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getCookie } from "cookies-next";
 import Link from "next/link";
 import revalidate from "@/util/revalidate";
 import PATHS from "@/paths";
-import MESSAGE from "@/messages";
 
 const loginFields = {
     email: "",
     password: "",
 };
 
-export default function Login() {
+export default function Login({ errorMessage }: { errorMessage: string }) {
     const [loginData, setLoginData] = useState(loginFields);
     const [errors, setErrors] = useState(loginFields);
     const [validationError, setValidationError] = useState("");
+    const params = useParams();
     const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,7 +28,7 @@ export default function Login() {
             if (!emailRegex.test(value)) {
                 setErrors((prev) => ({
                     ...prev,
-                    email: MESSAGE.ERROR.INVALID_INPUT("email"),
+                    email: errorMessage,
                 }));
             } else {
                 setErrors((prev) => ({ ...prev, email: "" }));
@@ -73,12 +73,13 @@ export default function Login() {
         if (response.status === 200) {
             await revalidate();
             router.push(
-                PATHS.PAGES(localStorage.getItem("activeAccount") || "").HOME
+                `/${params.locale}/${
+                    PATHS.PAGES(localStorage.getItem("activeAccount") || "")
+                        .HOME
+                }`
             );
         } else if (response.status === 401) {
-            setValidationError(
-                MESSAGE.ERROR.INVALID_INPUT("email and password")
-            );
+            setValidationError(errorMessage);
         }
     };
 

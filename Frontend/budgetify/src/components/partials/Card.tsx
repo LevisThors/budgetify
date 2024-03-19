@@ -1,14 +1,12 @@
-import { TransactionType } from "@/type/TransactionType";
 import { Suspense } from "react";
 import Transaction from "../Transaction";
 import Image from "next/image";
-import { SubscriptionType } from "@/type/SubscriptionType";
-import MESSAGE from "@/messages";
 import Subscription from "../Subscription";
 import ItemLoading from "./ItemLoading";
 import Obligatory from "../Obligatory";
+import { getTranslations } from "next-intl/server";
 
-export default function Card({
+export default async function Card({
     transaction,
     currency,
     page,
@@ -17,6 +15,8 @@ export default function Card({
     currency: string;
     page?: "transactions" | "subscriptions" | "obligatories";
 }) {
+    const t = await getTranslations("Card");
+
     return (
         <div className="w-full h-[90px] bg-white rounded-lg px-4 py-3 relative">
             <Suspense>
@@ -59,7 +59,7 @@ export default function Card({
                                     />
                                 </span>
                                 <p>
-                                    {transaction.type} ·{" "}
+                                    {t(transaction.type.toLowerCase())} ·{" "}
                                     {new Date(
                                         transaction.payment_date
                                     ).toLocaleDateString("en-GB", {
@@ -75,14 +75,14 @@ export default function Card({
                             <p>
                                 {page === "subscriptions" ? (
                                     <>
-                                        {MESSAGE.PAYMENT.NEXT_DATE}:{" "}
+                                        {t("nextDate")}:{" "}
                                         <strong>
                                             {transaction.first_payment_date}
                                         </strong>
                                     </>
                                 ) : (
                                     <>
-                                        {MESSAGE.PAYMENT.DATES}:{" "}
+                                        {t("dates")}:{" "}
                                         <strong>
                                             {transaction.first_payment_date} -{" "}
                                             {transaction.second_payment_date}

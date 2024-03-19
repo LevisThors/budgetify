@@ -17,6 +17,7 @@ import {
     TooltipTrigger,
 } from "../ui/tooltip";
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export function DatePicker({
     originalDate,
@@ -28,6 +29,19 @@ export function DatePicker({
     const [date, setDate] = useState<Date | undefined>(
         originalDate || new Date()
     );
+    const params = useParams();
+    const [t, setT] = useState<{ [key: string]: string }>();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setT(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     useEffect(() => {
         if (date) onDateChange(date);
@@ -38,7 +52,7 @@ export function DatePicker({
             <PopoverTrigger asChild>
                 <fieldset className="border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2">
                     <legend className="text-sm ms-2 px-1 text-gray-400">
-                        Payment Date <span className="text-red-500">*</span>
+                        {t?.paymentDate} <span className="text-red-500">*</span>
                     </legend>
                     <TooltipProvider>
                         <Tooltip>

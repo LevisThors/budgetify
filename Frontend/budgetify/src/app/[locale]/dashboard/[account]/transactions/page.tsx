@@ -1,4 +1,5 @@
 import Card from "@/components/partials/Card";
+import { TransactionType } from "@/type/TransactionType";
 import { cookies } from "next/headers";
 import ActionButton from "@/components/partials/ActionButton";
 import {
@@ -9,23 +10,23 @@ import {
     SheetClose,
 } from "@/components/ui/sheet";
 import Image from "next/image";
+import AccountForm from "@/components/AccountForm";
 import { Suspense } from "react";
 import TransactionForm from "@/components/TransactionForm";
 import PATHS from "@/paths";
+import PiggyBank from "@/components/PiggyBank";
+import FilterButton from "@/components/partials/FilterButton";
 import SearchBar from "@/components/partials/SearchBar";
 import SortBy from "@/components/partials/SortBy";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import SubscriptionForm from "@/components/SubscriptionsForm";
-import MESSAGE from "@/messages";
-import { SubscriptionType } from "@/type/SubscriptionType";
-import ObligatoryForm from "@/components/ObligatoryForm";
 import { LoadingProvider } from "@/context/Loading";
-import { ObligatoryType } from "@/type/ObligatoryType";
+import { getTranslations } from "next-intl/server";
 
-interface ObligatoriesPageProps {
+interface TransactionsPageProps {
     params: {
         account: string;
+        locale: string;
     };
     searchParams?: {
         query?: string;
@@ -34,12 +35,12 @@ interface ObligatoriesPageProps {
     };
 }
 
-async function getObligatories(
+async function getTransactions(
     accountId: string,
     searchParams: { query?: string; type?: string; sort?: string } | null
 ) {
     const response = await fetch(
-        `${PATHS.API.BASE.OBLIGATORY.GET}?account_id=${accountId}${
+        `${PATHS.API.BASE.TRANSACTION.GET}?account_id=${accountId}${
             searchParams?.query ? `&query=${searchParams.query}` : ""
         }${searchParams?.type ? `&type=${searchParams.type}` : ""}${
             searchParams?.sort ? `&sort=${searchParams.sort}` : ""
@@ -77,66 +78,69 @@ const getCategories = async (accountId: string) => {
     return res.json();
 };
 
-export default async function ObligatoriesPage({
+export default async function TransactionsPage({
     params,
     searchParams,
-}: ObligatoriesPageProps) {
-    const obligatoriesData = await getObligatories(
+}: TransactionsPageProps) {
+    const transactionsData = await getTransactions(
         params?.account,
         searchParams || null
     );
 
+    const t = await getTranslations("Transaction");
+    const accountMessages = await getTranslations("Account");
     const category = await getCategories(params.account);
     const hasCategories =
         category.Expenses.length > 0 || category.Income.length > 0;
 
     return (
-        <section className="flex w-full justify-between h-full">
+        <section className="flex w-full justify-between h-full min-h-[90vh]">
             <div className="w-2/3 px-16 flex flex-col gap-5">
                 <Suspense>
                     <SearchBar />
                 </Suspense>
-                <SortBy />
+                <SortBy type="transactions" />
                 <Suspense>
                     <ScrollArea>
                         <div className="max-h-[75vh] flex flex-col gap-5">
-                            {obligatoriesData?.message !== "Empty account" ? (
-                                obligatoriesData?.obligatories?.map(
-                                    (obligatory: ObligatoryType) => (
-                                        <LoadingProvider key={obligatory.id}>
+                            {transactionsData?.message !== "Empty account" ? (
+                                transactionsData?.transactions?.map(
+                                    (transaction: TransactionType) => (
+                                        <LoadingProvider key={transaction.id}>
                                             <Card
-                                                key={obligatory.id}
-                                                transaction={obligatory}
-                                                page="obligatories"
+                                                transaction={transaction}
                                                 currency={currencyToSymbol(
-                                                    obligatoriesData.currency
+                                                    transactionsData.currency
                                                 )}
+                                                page="transactions"
                                             />
                                         </LoadingProvider>
                                     )
                                 )
                             ) : (
                                 <span className="w-full text-center">
-                                    {MESSAGE.ERROR.NOT_FOUND("Obligatories")}
+                                    {t("notFound")}
                                 </span>
                             )}
                         </div>
                     </ScrollArea>
                 </Suspense>
             </div>
-            <div className="w-1/3 flex flex-col justify-between h-full gap-4">
+            <div className="w-1/3 flex flex-col justify-between h-full gap-4 min-h-[85vh]">
                 <div className="flex flex-col gap-4">
+                    <Suspense>
+                        <FilterButton type="Income" />
+                        <FilterButton type="Expenses" />
+                    </Suspense>
                     <Suspense fallback="loading">
                         <Sheet>
                             <SheetTrigger>
-                                <ActionButton
-                                    text={MESSAGE.BUTTON.ADD("Obligatory")}
-                                />
+                                <ActionButton text={accountMessages("add")} />
                             </SheetTrigger>
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
                                     <h1 className="text-2xl">
-                                        {MESSAGE.BUTTON.ADD("Obligatory")}
+                                        {accountMessages("add")}
                                     </h1>
                                     <div>
                                         <SheetClose>
@@ -149,25 +153,21 @@ export default async function ObligatoriesPage({
                                         </SheetClose>
                                     </div>
                                 </SheetHeader>
-                                <LoadingProvider>
-                                    <ObligatoryForm type="create" />
-                                </LoadingProvider>
+                                <AccountForm type="create" />
                             </SheetContent>
                         </Sheet>
                         <Sheet>
                             {hasCategories && (
                                 <SheetTrigger>
                                     <ActionButton
-                                        text={MESSAGE.BUTTON.ADD("Transaction")}
+                                        text={t("add")}
                                         needsAccount={true}
                                     />
                                 </SheetTrigger>
                             )}
                             <SheetContent>
                                 <SheetHeader className="flex flex-row justify-between items-center">
-                                    <h1 className="text-2xl">
-                                        {MESSAGE.BUTTON.ADD("Transaction")}
-                                    </h1>
+                                    <h1 className="text-2xl">{t("add")}</h1>
                                     <div>
                                         <SheetClose>
                                             <Image
@@ -185,6 +185,11 @@ export default async function ObligatoriesPage({
                             </SheetContent>
                         </Sheet>
                     </Suspense>
+                </div>
+                <div>
+                    {!isNaN(Number(params.account)) && (
+                        <PiggyBank accountId={params.account} />
+                    )}
                 </div>
             </div>
         </section>

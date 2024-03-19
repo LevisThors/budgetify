@@ -1,16 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BarChart from "./partials/BarChart";
 import { DateRangePicker } from "./partials/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { DataTable } from "./partials/DataTable";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { MonthlyDataTable } from "./partials/MonthlyDataTable";
 import { format } from "date-fns";
 import LineChart from "./partials/LineChart";
-import Button from "./partials/Button";
 import Link from "next/link";
 import PATHS from "@/paths";
 
@@ -29,6 +28,10 @@ export default function Statistics({
     const { currency, ...statisticsWithoutCurrency } = statistics;
     const router = useRouter();
     const pathname = usePathname();
+    const params = useParams();
+    const [t, setT] = useState<{
+        [key: string]: string;
+    }>({});
     const totalSpent = Object.entries(statisticsWithoutCurrency).reduce(
         (acc, [_, value]: any) => {
             return acc + value;
@@ -45,6 +48,19 @@ export default function Statistics({
         );
     };
 
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setT(messageData.Statistics);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
+    if (Object.entries(t).length === 0) return;
+
     return (
         <section className="flex h-fit w-full justify-between px-10 gap-10">
             <div className="flex flex-col gap-3 w-full">
@@ -58,7 +74,7 @@ export default function Statistics({
                             }`}
                             onClick={() => setActiveCategory("Categories")}
                         >
-                            Categories Statistic
+                            {t.category}
                         </span>
                         <span
                             className={`px-3 py-2 w-fit ${
@@ -66,7 +82,7 @@ export default function Statistics({
                             }`}
                             onClick={() => setActiveCategory("Monthly")}
                         >
-                            Monthly Statistic
+                            {t.monthly}
                         </span>
                     </div>
                     <Link
@@ -81,7 +97,7 @@ export default function Statistics({
                                   )
                         }
                     >
-                        Download Report
+                        {t.download}
                     </Link>
                 </div>
                 {activeCategory === "Categories" ? (
@@ -92,7 +108,7 @@ export default function Statistics({
                         />
                         <div className="bg-white flex rounded-md overflow-hidden py-2 px-4 flex-col">
                             <span className="text-xs text-gray-400 ">
-                                Total Expenses
+                                {t.total}
                             </span>
                             <span className="text-lg text-red-500 font-medium">
                                 {totalSpent}
@@ -101,6 +117,7 @@ export default function Statistics({
                         </div>
                         <DataTable
                             categoryStatistics={statisticsWithoutCurrency}
+                            headerTranslations={t.headers}
                             currency={currency}
                         />
                     </>
@@ -112,7 +129,7 @@ export default function Statistics({
                         />
                         <div className="bg-white flex rounded-md overflow-hidden py-2 px-4 flex-col">
                             <span className="text-xs text-gray-400 ">
-                                Total Expenses
+                                {t.total}
                             </span>
                             <span className="text-lg text-red-500 font-medium">
                                 {totalSpent}
@@ -121,6 +138,7 @@ export default function Statistics({
                         </div>
                         <MonthlyDataTable
                             monthlyStatistics={monthlyStatistics}
+                            headerTranslations={t.headers}
                             currency={currency}
                         />
                         <LineChart data={monthlyStatistics} />

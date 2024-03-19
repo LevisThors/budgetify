@@ -24,10 +24,10 @@ import {
 } from "./ui/dialog";
 import DocumentImage from "./partials/DocumentImage";
 import { useLoading } from "../context/Loading";
-import MESSAGE from "@/messages";
 import DialogBody from "./partials/DialogBody";
 import Link from "next/link";
 import { DatePicker } from "./partials/DatePicker";
+import { useParams } from "next/navigation";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -51,10 +51,35 @@ export default function TransactionForm({
     transaction,
     changeActiveType,
 }: TransactionFormProps) {
+    const [inputFields, setInputFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const [transactionFields, setTransactionFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setTransactionFields(messageData.Transaction);
+            setInputFields(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
     switch (type) {
         case "view":
             return (
-                transaction && <TransactionViewForm transaction={transaction} />
+                transaction && (
+                    <TransactionViewForm
+                        transaction={transaction}
+                        t={{ ...transactionFields, ...inputFields }}
+                    />
+                )
             );
         case "edit":
             return (
@@ -63,22 +88,35 @@ export default function TransactionForm({
                         type="edit"
                         transaction={transaction}
                         changeActiveType={changeActiveType}
+                        t={{ ...inputFields, ...transactionFields }}
                     />
                 )
             );
         case "create":
-            return <TransactionCreateForm type="create" />;
+            return (
+                <TransactionCreateForm
+                    type="create"
+                    t={{ ...inputFields, ...transactionFields }}
+                />
+            );
         default:
             return (
-                transaction && <TransactionViewForm transaction={transaction} />
+                transaction && (
+                    <TransactionViewForm
+                        transaction={transaction}
+                        t={{ ...transactionFields, ...inputFields }}
+                    />
+                )
             );
     }
 }
 
 function TransactionViewForm({
     transaction,
+    t,
 }: {
     transaction: TransactionType;
+    t: any;
 }) {
     const [isDocumentOpen, setIsDocumentOpen] = useState("");
 
@@ -114,7 +152,9 @@ function TransactionViewForm({
                                 }
                             />
                         </span>
-                        {transaction.type}
+                        {transaction.type === "Expenses"
+                            ? t.expenses
+                            : t.income}
                     </span>
                     <span
                         className={`text-3xl ${
@@ -142,21 +182,23 @@ function TransactionViewForm({
                 </div>
                 <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Payment Date:</span>
+                        <span className="w-1/3 font-bold">
+                            {t.paymentDate}:
+                        </span>
                         <span className="w-2/3">
                             {transaction.payment_date.toString()}
                         </span>
                     </div>
                     {transaction.payee && (
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                            <span className="w-1/3 font-bold">Payee:</span>
+                            <span className="w-1/3 font-bold">{t.payee}:</span>
                             <span className="w-2/3">{transaction.payee}</span>
                         </div>
                     )}
                     {transaction.description && (
                         <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
                             <span className="w-1/3 font-bold">
-                                Description:
+                                {t.description}:
                             </span>
                             <span className="w-2/3">
                                 {transaction.description}
@@ -212,7 +254,7 @@ function TransactionViewForm({
                                                     alt="filter-button"
                                                 />
                                             </span>
-                                            Download
+                                            {t.download}
                                         </Link>
                                     </div>
                                 </div>
@@ -228,7 +270,7 @@ function TransactionViewForm({
                 </div>
             </div>
             <SheetFooter>
-                <SheetClose className="text-lg">Close</SheetClose>
+                <SheetClose className="text-lg">{t.close}</SheetClose>
             </SheetFooter>
         </div>
     );
@@ -238,10 +280,12 @@ function TransactionCreateForm({
     type,
     transaction,
     changeActiveType,
+    t,
 }: {
     type: string;
     transaction?: TransactionType;
     changeActiveType?: (type: string) => void;
+    t: any;
 }) {
     const [formData, setFormData] = useState(
         transaction ? transaction : emptyTransaction
@@ -322,7 +366,7 @@ function TransactionCreateForm({
     };
 
     const handleInactive = () => {
-        setError(MESSAGE.ERROR.FILL_REQUIRED);
+        setError(t.fillReq);
     };
 
     const handleDateChange = (date: Date | undefined) => {
@@ -399,11 +443,11 @@ function TransactionCreateForm({
                         if (changeActiveType) changeActiveType("view");
                     }
                     toast({
-                        description: MESSAGE.SUCCESS.CREATION("Transaction"),
+                        description: t.create,
                     });
                 }
                 if (res.status === 400) {
-                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                    setError(t.insFunds);
                 }
             });
         }
@@ -454,13 +498,17 @@ function TransactionCreateForm({
                                         }
                                     />
                                 </span>
-                                <span>{type}</span>
+                                <span>
+                                    {type === "Expenses"
+                                        ? t.expenses
+                                        : t.income}
+                                </span>
                             </div>
                         ))}
                     </div>
                 </div>
                 <Input
-                    label="Title"
+                    label={t.title}
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
@@ -469,7 +517,7 @@ function TransactionCreateForm({
                 />
                 {categories && (
                     <MultiSelect
-                        label="Categories"
+                        label={t.categories}
                         categories={categories[formData.type]}
                         refetch={refetchCategories}
                         selected={formData.categories}
@@ -479,7 +527,7 @@ function TransactionCreateForm({
                     />
                 )}
                 <Input
-                    label="Amount"
+                    label={t.amount}
                     name="amount"
                     type="number"
                     value={formData.amount.toString()}
@@ -491,13 +539,13 @@ function TransactionCreateForm({
                     originalDate={formData.payment_date as Date}
                 />
                 <Input
-                    label="Payee"
+                    label={t.payee}
                     name="payee"
                     value={formData.payee}
                     onChange={handleChange}
                 />
                 <Input
-                    label="Description"
+                    label={t.description}
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
@@ -511,18 +559,18 @@ function TransactionCreateForm({
             <SheetFooter className="flex gap-4">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button>Cancel</button>
+                        <button>{t.camcel}</button>
                     </DialogTrigger>
                     <DialogBody
-                        header="Cancel Transaction"
-                        body={MESSAGE.WARNING.CANCEL("transaction")}
+                        header={t.cancelH}
+                        body={t.cancelM}
                         onYes={() => closeRef.current?.click()}
                     />
                 </Dialog>
                 <Button
                     onClick={handleSubmit}
                     onInactiveClick={handleInactive}
-                    text="Save"
+                    text={t.save}
                     className="text-red px-5"
                     active={isFormValid()}
                 />
