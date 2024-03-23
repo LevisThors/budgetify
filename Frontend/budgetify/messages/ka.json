@@ -98,6 +98,7 @@
         "download": "ანგარიშის ჩაწერა",
         "dateRange": "დროის მონაკვეთი",
         "total": "სულ ხარჯი",
+        "selectedCategories": "არჩეული კატეგორიები",
         "headers": {
             "category": "კატეგორია",
             "amount": "რაოდენობა",

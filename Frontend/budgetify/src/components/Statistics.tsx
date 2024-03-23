@@ -6,12 +6,18 @@ import { DateRangePicker } from "./partials/DateRangePicker";
 import { DateRange } from "react-day-picker";
 import currencyToSymbol from "@/util/currencyToSymbol";
 import { DataTable } from "./partials/DataTable";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import {
+    useParams,
+    usePathname,
+    useRouter,
+    useSearchParams,
+} from "next/navigation";
 import { MonthlyDataTable } from "./partials/MonthlyDataTable";
 import { format } from "date-fns";
 import LineChart from "./partials/LineChart";
 import Link from "next/link";
 import PATHS from "@/paths";
+import { CheckboxDropdown } from "./partials/CheckboxDropdown";
 
 export default function Statistics({
     statistics,
@@ -29,6 +35,7 @@ export default function Statistics({
     const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
+    const searchParams = useSearchParams();
     const [t, setT] = useState<{
         [key: string]: string;
     }>({});
@@ -89,9 +96,16 @@ export default function Statistics({
                         className={`bg-buttonTeal text-authBlack py-3 px-4 rounded-md`}
                         href={
                             activeCategory === "Categories"
-                                ? PATHS.API.PROXY.STATISTIC.DOWNLOAD_CATEGORY(
+                                ? `${PATHS.API.PROXY.STATISTIC.DOWNLOAD_CATEGORY(
                                       accountId
-                                  )
+                                  )}
+                                  ${
+                                      searchParams.get("categories") != null
+                                          ? `&categories=${searchParams.get(
+                                                "categories"
+                                            )}`
+                                          : ""
+                                  }`
                                 : PATHS.API.PROXY.STATISTIC.DOWNLOAD_MONTHLY(
                                       accountId
                                   )
@@ -106,6 +120,7 @@ export default function Statistics({
                             type="filter"
                             onDateChange={handleDateChange}
                         />
+                        <CheckboxDropdown title={t.selectedCategories} />
                         <div className="bg-white flex rounded-md overflow-hidden py-2 px-4 flex-col">
                             <span className="text-xs text-gray-400 ">
                                 {t.total}

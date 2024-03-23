@@ -103,7 +103,13 @@ class CategoryController extends Controller
             });
         }
 
-        $categories = $categories->where("type", "Expenses")->get();
+        if (isset($request->categories)) {
+            $categoryIds = explode(',', $request->categories);
+            $categoriesQuery = $categories->whereIn("id", $categoryIds);
+            $categories = $categoriesQuery->where("type", "Expenses")->get();
+        } else {
+            $categories = $categories->where("type", "Expenses")->get();
+        }
 
         $statistics = [];
         foreach ($categories as $category) {

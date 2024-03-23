@@ -10,12 +10,20 @@ async function getCategoryStatistics(
         | {
               download?: string;
               date?: string;
+              categories?: string;
           }
         | undefined
 ) {
     const response = await fetch(
         `${PATHS.API.BASE.CATEGORY_STATISTICS.GET}?account_id=${accountId}&${
-            searchParams?.date ? `&date=${searchParams.date}` : ""
+            searchParams?.date
+                ? `&date=${searchParams.date}&
+            ${
+                searchParams?.categories
+                    ? `&categories=${searchParams.categories}`
+                    : ""
+            }`
+                : ""
         }`,
         {
             headers: {
@@ -68,6 +76,7 @@ export default async function StatisticPage({
     searchParams?: {
         download?: string;
         date?: string;
+        categories?: string;
     };
 }) {
     const categoryStatistics = await getCategoryStatistics(
