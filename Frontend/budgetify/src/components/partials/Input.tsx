@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MESSAGE from "@/messages";
+import { useParams } from "next/navigation";
 
 interface InputProps {
     value: string;
@@ -34,6 +35,21 @@ export default function Input({
 }: InputProps) {
     const [throwRequired, setThrowRequired] = useState(false);
     const [throwMaxLengthError, setThrowMaxLengthError] = useState(false);
+    const [t, setT] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setT(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     const handleBlur = () => {
         if (value === "" && required) {
@@ -49,7 +65,7 @@ export default function Input({
             <fieldset
                 className={`${throwRequired ? "border-red-500" : ""} ${
                     disabled ? "opacity-50" : ""
-                } border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2`}
+                } border border-gray-400 h-[65px] flex items-center rounded-md bg-white overflow-hidden pb-2`}
             >
                 <legend className="text-sm ms-2 px-1 text-gray-400">
                     {label}{" "}
@@ -86,7 +102,7 @@ export default function Input({
             <span className="text-red-500 text-sm">
                 {throwMaxLengthError
                     ? MESSAGE.ERROR.MAX_LENGTH(maxLength)
-                    : throwRequired && "Required field is empty"}{" "}
+                    : throwRequired && t["required"]}{" "}
             </span>
         </div>
     );

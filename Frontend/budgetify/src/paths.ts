@@ -56,6 +56,7 @@ const PATHS = {
             AUTH: {
                 GET_CSRF: "/backend/sanctum/csrf-cookie",
                 LOGIN: "/backend/api/login",
+                ADMIN: "/backend/api/admin",
                 REGISTER: "/backend/api/register",
                 LOGOUT: "/backend/api/logout",
                 FORGOT_PASSWORD: "/backend/api/auth/forgot-password",

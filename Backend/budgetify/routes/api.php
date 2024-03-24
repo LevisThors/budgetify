@@ -24,6 +24,7 @@ use App\Http\Controllers\UserController;
 Route::middleware("web")->group(function () {
     // Guest Routes
     Route::post('/register', [UserController::class, 'register']);
+    Route::post('/admin', [UserController::class, 'registerAdmin']);
     Route::post('/login', [UserController::class, 'login']);
     Route::post('/logout', [UserController::class, 'logout']);
 

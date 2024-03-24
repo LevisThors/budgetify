@@ -20,54 +20,58 @@ class TransactionController extends Controller
     public function getAll(Request $request)
     {
         if (is_numeric($request->account_id)) {
-            $query = $this->getModel()::where('account_id', $request['account_id'])
-                ->with('categories');
+            if (Auth::user()->accounts->where("id", $request->account_id)->first()) {
+                $query = $this->getModel()::where('account_id', $request['account_id'])
+                    ->with('categories');
 
-            if (isset($request->type)) {
-                $query->where('type', $request->type);
-            }
+                if (isset($request->type)) {
+                    $query->where('type', $request->type);
+                }
 
-            if (isset($request['query'])) {
-                $searchTerm = '%' . $request['query'] . '%';
-                $query->where(function ($query) use ($searchTerm) {
-                    $query->where('title', 'like', $searchTerm)
-                        ->orWhere('description', 'like', $searchTerm)
-                        ->orWhereHas('categories', function ($query) use ($searchTerm) {
-                            $query->where('title', 'like', $searchTerm);
-                        });
+                if (isset($request['query'])) {
+                    $searchTerm = '%' . $request['query'] . '%';
+                    $query->where(function ($query) use ($searchTerm) {
+                        $query->where('title', 'like', $searchTerm)
+                            ->orWhere('description', 'like', $searchTerm)
+                            ->orWhereHas('categories', function ($query) use ($searchTerm) {
+                                $query->where('title', 'like', $searchTerm);
+                            });
+                    });
+                }
+
+                if (isset($request['sort'])) {
+                    [$column, $direction] = explode('-', $request['sort']);
+                    $query->orderBy($column, $direction);
+                } else {
+                    $query->orderBy('payment_date', 'desc');
+                }
+
+                $transactions = $query->get()->map(function ($transaction) {
+                    $transaction->documents = $transaction->getMedia()->map(function ($media) {
+                        return [
+                            'url' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
+                            'path' => $media->getPath(),
+                            'name' => $media->name,
+                        ];
+                    });
+
+                    return $transaction;
                 });
-            }
 
-            if (isset($request['sort'])) {
-                [$column, $direction] = explode('-', $request['sort']);
-                $query->orderBy($column, $direction);
+                if ($transactions->count() == 0) {
+                    return response()->json(['message' => 'Empty account'], 200);
+                }
+
+                return response()->json(
+                    [
+                        'transactions' => $transactions,
+                        'currency' => Account::find($request->account_id)->first()->currency,
+                    ],
+                    200
+                );
             } else {
-                $query->orderBy('payment_date', 'desc');
-            }
-
-            $transactions = $query->get()->map(function ($transaction) {
-                $transaction->documents = $transaction->getMedia()->map(function ($media) {
-                    return [
-                        'url' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
-                        'path' => $media->getPath(),
-                        'name' => $media->name,
-                    ];
-                });
-
-                return $transaction;
-            });
-
-            if ($transactions->count() == 0) {
                 return response()->json(['message' => 'Empty account'], 200);
             }
-
-            return response()->json(
-                [
-                    'transactions' => $transactions,
-                    'currency' => Account::find($request->account_id)->first()->currency,
-                ],
-                200
-            );
         } else {
             return response()->json(['message' => 'Empty account'], 200);
         }

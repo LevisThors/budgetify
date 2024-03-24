@@ -132,6 +132,7 @@
         "save": "Save",
         "cancel": "cancel",
         "close": "Close",
-        "monthly": "Monthly"
+        "monthly": "Monthly",
+        "required": "Required field is empty"
     }
 }
