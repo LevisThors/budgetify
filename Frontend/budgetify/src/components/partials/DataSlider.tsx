@@ -10,7 +10,7 @@ interface DataSliderProps {
     toggleActiveFilter?: any;
     activeFilters?: string[];
     size?: "small" | "large";
-    remove?: (id: string) => void;
+    remove?: (id: string, event: any) => void;
 }
 
 export default function DataSlider({
@@ -53,15 +53,19 @@ export default function DataSlider({
                         <button
                             key={category.id}
                             name={category?.id?.toString()}
-                            className="flex gap-2 items-center px-2 py-1 border border-authBlack rounded-lg cursor-pointer"
+                            className="flex gap-2 items-center px-2 py-1 border border-authBlack rounded-lg cursor-pointer
+                            z-30"
                         >
                             {category.title}
                             {remove && (
                                 <Image
                                     src="/icons/close.svg"
                                     alt="remove-category"
-                                    onClick={() =>
-                                        remove(category?.id?.toString() || "")
+                                    onClick={(e) =>
+                                        remove(
+                                            category?.id?.toString() || "",
+                                            e
+                                        )
                                     }
                                     width={16}
                                     height={16}

@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin();
+
 const nextConfig = {
     rewrites: () => {
         return [
@@ -12,10 +16,10 @@ const nextConfig = {
         remotePatterns: [
             {
                 protocol: "https",
-                hostname: "afa0-95-137-233-69.ngrok-free.app",
+                hostname: "0969-95-137-233-69.ngrok-free.app",
             },
         ],
     },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

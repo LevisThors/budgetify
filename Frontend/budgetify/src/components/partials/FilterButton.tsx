@@ -2,13 +2,31 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+
+interface FilterButtonData {
+    [key: string]: string;
+}
 
 export default function FilterButton({ type }: { type: string }) {
     const pathname = usePathname();
     const searchQuery = useSearchParams().get("query");
     const sortQuery = useSearchParams().get("sort");
     const typeQuery = useSearchParams().get("type");
+    const [filterButtons, setFilterButtons] = useState<FilterButtonData>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setFilterButtons(messageData.Filters);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     const active = typeQuery === type;
     let finalUrl = pathname;
@@ -47,7 +65,9 @@ export default function FilterButton({ type }: { type: string }) {
                     }
                 />
             </span>
-            <span className="font-medium">{type}</span>
+            <span className="font-medium">
+                {filterButtons[type.toLowerCase()]}
+            </span>
         </Link>
     );
 }

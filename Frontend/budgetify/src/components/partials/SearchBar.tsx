@@ -1,7 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+    useParams,
+    usePathname,
+    useRouter,
+    useSearchParams,
+} from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SearchBar() {
@@ -10,10 +15,25 @@ export default function SearchBar() {
     const { replace } = useRouter();
     const sortQuery = useSearchParams().get("sort");
     const typeQuery = useSearchParams().get("type");
+    const [filterButtons, setFilterButtons] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
 
     const handleChange = (e: any) => {
         setSearchQuery(e.target.value);
     };
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setFilterButtons(messageData.Filters);
+        };
+
+        getMessage();
+    }, [params.locale]);
 
     useEffect(() => {
         let finalUrl = pathname;
@@ -46,7 +66,7 @@ export default function SearchBar() {
             </div>
             <input
                 type="text"
-                placeholder="Search"
+                placeholder={filterButtons.search}
                 className="w-full py-2 px-2 rounded-lg h-[55px] text-lg outline-none placeholder:text-authBlack"
                 onChange={handleChange}
                 value={searchQuery}

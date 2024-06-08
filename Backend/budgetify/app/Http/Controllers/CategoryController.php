@@ -2,11 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CategoryStatisticsExport;
+use App\Exports\CategoryStatisticsReport;
+use App\Exports\MonthlyStatisticsExport;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\Transaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CategoryController extends Controller
 {
@@ -94,17 +100,68 @@ class CategoryController extends Controller
 
             $categories->whereHas('transactions', function ($query) use ($dates) {
                 $query->whereBetween('payment_date', [$dates[0], $dates[1]]);
-            })->orWhereHas('subscriptions', function ($query) use ($dates) {
-                $query->whereBetween('payment_date', [$dates[0], $dates[1]]);
             });
         }
 
-        $categories = $categories->get();
+        if (isset($request->categories)) {
+            $categoryIds = explode(',', $request->categories);
+            $categoriesQuery = $categories->whereIn("id", $categoryIds);
+            $categories = $categoriesQuery->where("type", "Expenses")->get();
+        } else {
+            $categories = $categories->where("type", "Expenses")->get();
+        }
 
         $statistics = [];
         foreach ($categories as $category) {
-            $statistics[$category->title] = $category->transactions->where("type", "Expenses")->sum("amount")
-                + $category->subscriptions->sum("amount");
+            $statistics[$category->title] = $category->transactions->where("type", "Expenses")->sum("amount");
+        }
+
+        $statistics["currency"] = Account::find($request->account_id)->currency;
+
+        if (isset($request->download)) {
+            return Excel::download(new CategoryStatisticsExport($statistics), 'category_statistics.xlsx');
+        }
+
+        return response()->json($statistics, 200);
+    }
+
+    public function getMonthlyStatistics(Request $request)
+    {
+        $dates = explode(',', $request->date);
+        $date_from = Carbon::parse($dates[0] ?? now()->subMonths(5));
+        $date_to = isset($dates[1]) ? Carbon::parse($dates[1]) : now();
+
+        $statistics = [];
+
+        while ($date_from->lessThanOrEqualTo($date_to)) {
+            $transactions = Transaction::whereMonth('payment_date', $date_from->month)
+                ->whereYear('payment_date', $date_from->year)
+                ->where('account_id', $request->account_id)
+                ->get();
+
+            $income = $transactions->where('type', 'Income')->sum('amount');
+            $expenses = $transactions->where('type', 'Expenses')->sum('amount');
+            $economy = $income - $expenses;
+            $percentageOfEconomy = $income > 0 ? number_format(($economy / $income) * 100, 2) : 0;
+
+            if ($income < $expenses) {
+                $economy = $expenses - $income;
+                $percentageOfEconomy = $expenses > 0 ? number_format(($economy / $expenses) * 100, 2) : 0;
+            }
+
+            $statistics[] = [
+                'month' => $date_from->format('F Y'),
+                'income' => $income,
+                'expenses' => $expenses,
+                'economy' => $economy,
+                'percentage_of_economy' => $percentageOfEconomy
+            ];
+
+            $date_from->addMonth();
+        }
+
+        if (isset($request->download)) {
+            return Excel::download(new MonthlyStatisticsExport($statistics), 'monthly_statistics.xlsx');
         }
 
         return response()->json($statistics, 200);

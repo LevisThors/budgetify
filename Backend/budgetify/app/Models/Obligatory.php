@@ -13,7 +13,8 @@ class Obligatory extends Model
         'title',
         'description',
         'amount',
-        'payment_dates',
+        'first_payment_date',
+        'second_payment_date',
         'account_id',
     ];
 

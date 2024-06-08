@@ -20,6 +20,7 @@ import revalidate from "@/util/revalidate";
 import PATHS from "@/paths";
 import { DialogTrigger, Dialog } from "./ui/dialog";
 import DialogBody from "./partials/DialogBody";
+import MESSAGE from "@/messages";
 
 export default function Account({ account }: { account: AccountType }) {
     const [activeAccount, setActiveAccount] = useState<string | null>("");
@@ -112,7 +113,9 @@ export default function Account({ account }: { account: AccountType }) {
                                             </DialogTrigger>
                                             <DialogBody
                                                 header="Delete Account"
-                                                body="Are you sure you want to delete account?"
+                                                body={MESSAGE.WARNING.DELETE(
+                                                    "Account"
+                                                )}
                                                 onYes={() =>
                                                     handleDelete(
                                                         account.id || ""

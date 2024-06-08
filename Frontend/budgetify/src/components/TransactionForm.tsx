@@ -13,6 +13,7 @@ import Dropzone from "./partials/Dropzone";
 import MultiSelect from "./partials/MultiSelect";
 import PATHS from "@/paths";
 import Image from "next/image";
+import { format } from "date-fns";
 import {
     DialogTrigger,
     Dialog,
@@ -22,8 +23,11 @@ import {
     DialogHeader,
 } from "./ui/dialog";
 import DocumentImage from "./partials/DocumentImage";
-import ActionButton from "./partials/ActionButton";
-import MESSAGE from "@/messages";
+import { useLoading } from "../context/Loading";
+import DialogBody from "./partials/DialogBody";
+import Link from "next/link";
+import { DatePicker } from "./partials/DatePicker";
+import { useParams } from "next/navigation";
 
 const emptyTransaction = {
     type: "Expenses" as "Income" | "Expenses",
@@ -47,10 +51,35 @@ export default function TransactionForm({
     transaction,
     changeActiveType,
 }: TransactionFormProps) {
+    const [inputFields, setInputFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const [transactionFields, setTransactionFields] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../messages/${params.locale}.json`
+            );
+            setTransactionFields(messageData.Transaction);
+            setInputFields(messageData.Input);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
     switch (type) {
         case "view":
             return (
-                transaction && <TransactionViewForm transaction={transaction} />
+                transaction && (
+                    <TransactionViewForm
+                        transaction={transaction}
+                        t={{ ...transactionFields, ...inputFields }}
+                    />
+                )
             );
         case "edit":
             return (
@@ -59,119 +88,190 @@ export default function TransactionForm({
                         type="edit"
                         transaction={transaction}
                         changeActiveType={changeActiveType}
+                        t={{ ...inputFields, ...transactionFields }}
                     />
                 )
             );
         case "create":
-            return <TransactionCreateForm type="create" />;
+            return (
+                <TransactionCreateForm
+                    type="create"
+                    t={{ ...inputFields, ...transactionFields }}
+                />
+            );
         default:
             return (
-                transaction && <TransactionViewForm transaction={transaction} />
+                transaction && (
+                    <TransactionViewForm
+                        transaction={transaction}
+                        t={{ ...transactionFields, ...inputFields }}
+                    />
+                )
             );
     }
 }
 
 function TransactionViewForm({
     transaction,
+    t,
 }: {
     transaction: TransactionType;
+    t: any;
 }) {
-    const [isDocumentOpen, setIsDocumentOpen] = useState(false);
+    const [isDocumentOpen, setIsDocumentOpen] = useState("");
+
+    const handleOpenDocument = (path: string) => {
+        setIsDocumentOpen(path);
+    };
+
     const handleCloseDocument = () => {
-        setIsDocumentOpen((prev) => !prev);
+        setIsDocumentOpen("");
     };
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex justify-between">
-                <span className="text-lg">{transaction.type}</span>
-                <span
-                    className={`text-3xl ${
-                        transaction.type === "Expenses"
-                            ? "text-red-500"
-                            : "text-green-500"
-                    }`}
-                >
-                    {transaction.type === "Expenses" ? "-" : ""}
-                    {transaction.amount}$
-                </span>
-            </div>
-            <div>
-                <h1 className="text-2xl">{transaction.title}</h1>
-            </div>
-            <div className="flex gap-3">
-                {transaction.categories.map((category) => (
-                    <span
-                        key={category.id}
-                        className="px-9 py-3 border border-black rounded-lg font-bold"
-                    >
-                        {category.title}
+        <div className="flex flex-col justify-between h-[95%]">
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-between">
+                    <span className="text-lg flex items-center gap-2">
+                        <span
+                            className={`h-[30px] w-[30px] flex justify-center items-center rounded-full ${
+                                transaction.type === "Income"
+                                    ? "bg-[#21C206]"
+                                    : "bg-[#EE3F19]"
+                            }`}
+                        >
+                            <Image
+                                src="/icons/arrow.svg"
+                                width={15}
+                                height={17}
+                                alt="filter-button"
+                                className={
+                                    transaction.type === "Expenses"
+                                        ? "transform rotate-180"
+                                        : ""
+                                }
+                            />
+                        </span>
+                        {transaction.type === "Expenses"
+                            ? t.expenses
+                            : t.income}
                     </span>
-                ))}
-            </div>
-            <div>
-                <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                    <span className="w-1/3 font-bold">Payment Date:</span>
-                    <span className="w-2/3">
-                        {transaction.payment_date.toString()}
+                    <span
+                        className={`text-3xl ${
+                            transaction.type === "Expenses"
+                                ? "text-red-500"
+                                : "text-green-500"
+                        }`}
+                    >
+                        {transaction.type === "Expenses" ? "-" : ""}
+                        {transaction.amount}$
                     </span>
                 </div>
-                {transaction.payee && (
+                <div>
+                    <h1 className="text-2xl">{transaction.title}</h1>
+                </div>
+                <div className="flex gap-3">
+                    {transaction.categories.map((category) => (
+                        <span
+                            key={category.id}
+                            className="px-9 py-3 border border-black rounded-lg font-bold"
+                        >
+                            {category.title}
+                        </span>
+                    ))}
+                </div>
+                <div>
                     <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Payee:</span>
-                        <span className="w-2/3">{transaction.payee}</span>
+                        <span className="w-1/3 font-bold">
+                            {t.paymentDate}:
+                        </span>
+                        <span className="w-2/3">
+                            {transaction.payment_date.toString()}
+                        </span>
                     </div>
-                )}
-                {transaction.description && (
-                    <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
-                        <span className="w-1/3 font-bold">Description:</span>
-                        <span className="w-2/3">{transaction.description}</span>
-                    </div>
-                )}
-            </div>
-            <div>
-                {transaction.documents?.map(
-                    (document: { path: string; name: string }) => (
-                        <div key={document.path}>
-                            <div
-                                className="flex items-center justify-between w-full border-b py-1.5 border-authBlack last:border-none"
-                                onClick={handleCloseDocument}
-                            >
-                                <div className="flex items-center">
-                                    <Image
-                                        src="/icons/image.svg"
-                                        alt="Uploaded image"
-                                        width={70}
-                                        height={60}
-                                    />
-                                    <span className="text-xs max-w-full overflow-ellipsis">
-                                        {document.name}
-                                    </span>
-                                </div>
-                                <div className="h-[50px]">
-                                    <button className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5">
-                                        <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
-                                            <Image
-                                                src="/icons/download.svg"
-                                                width={15}
-                                                height={17}
-                                                alt="filter-button"
-                                            />
-                                        </span>
-                                        Download
-                                    </button>
-                                </div>
-                            </div>
-                            {isDocumentOpen && (
-                                <DocumentImage
-                                    imagePath={document.path}
-                                    closeDocument={handleCloseDocument}
-                                />
-                            )}
+                    {transaction.payee && (
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">{t.payee}:</span>
+                            <span className="w-2/3">{transaction.payee}</span>
                         </div>
-                    )
-                )}
+                    )}
+                    {transaction.description && (
+                        <div className="w-full flex py-3 border-b border-b-authBlack last:border-none text-lg">
+                            <span className="w-1/3 font-bold">
+                                {t.description}:
+                            </span>
+                            <span className="w-2/3">
+                                {transaction.description}
+                            </span>
+                        </div>
+                    )}
+                </div>
+                <div>
+                    {transaction.documents?.map(
+                        (document: {
+                            path: string;
+                            name: string;
+                            url: string;
+                        }) => (
+                            <div key={document.url}>
+                                <div
+                                    className="flex items-center justify-between w-full border-b py-1.5 border-authBlack cursor-pointer"
+                                    onClick={() =>
+                                        handleOpenDocument(document.path)
+                                    }
+                                >
+                                    <div className="flex items-center">
+                                        <Image
+                                            src="/icons/image.svg"
+                                            alt="Uploaded image"
+                                            width={70}
+                                            height={60}
+                                        />
+                                        <span className="text-xs max-w-full overflow-ellipsis">
+                                            {document.name}
+                                        </span>
+                                    </div>
+                                    <div className="h-[50px]">
+                                        <Link
+                                            href={PATHS.API.PROXY.TRANSACTION.DOWNLOAD(
+                                                document.path
+                                                    .split("/")
+                                                    .join("-s-")
+                                                    .split("\\")
+                                                    .join("-s-")
+                                            )}
+                                            download={document.name}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                            }}
+                                            className="bg-buttonTeal flex gap-2 rounded-lg items-center py-1.5 px-2.5"
+                                        >
+                                            <span className="h-[35px] w-[35px] bg-white flex justify-center items-center rounded-full">
+                                                <Image
+                                                    src="/icons/download.svg"
+                                                    width={15}
+                                                    height={17}
+                                                    alt="filter-button"
+                                                />
+                                            </span>
+                                            {t.download}
+                                        </Link>
+                                    </div>
+                                </div>
+                                {isDocumentOpen === document.path && (
+                                    <DocumentImage
+                                        imagePath={document.url}
+                                        closeDocument={handleCloseDocument}
+                                    />
+                                )}
+                            </div>
+                        )
+                    )}
+                </div>
             </div>
+            <SheetFooter>
+                <SheetClose className="text-lg">{t.close}</SheetClose>
+            </SheetFooter>
         </div>
     );
 }
@@ -180,10 +280,12 @@ function TransactionCreateForm({
     type,
     transaction,
     changeActiveType,
+    t,
 }: {
     type: string;
     transaction?: TransactionType;
     changeActiveType?: (type: string) => void;
+    t: any;
 }) {
     const [formData, setFormData] = useState(
         transaction ? transaction : emptyTransaction
@@ -194,6 +296,8 @@ function TransactionCreateForm({
     const [refetch, setRefetch] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
     const closeRef = useRef<HTMLButtonElement>(null);
+    const prevDateRef = useRef<Date | undefined>();
+    const { loadingStates, setLoadingStates } = useLoading();
     const { toast } = useToast();
 
     useEffect(() => {
@@ -261,6 +365,21 @@ function TransactionCreateForm({
         }
     };
 
+    const handleInactive = () => {
+        setError(t.fillReq);
+    };
+
+    const handleDateChange = (date: Date | undefined) => {
+        if (date && (!prevDateRef.current || date !== prevDateRef.current)) {
+            setFormData((prev) => ({
+                ...prev,
+                payment_date: format(date || new Date(), "yyyy-MM-dd"),
+            }));
+        }
+
+        prevDateRef.current = date;
+    };
+
     const isFormValid = () => {
         return (
             formData.title.trim() !== "" &&
@@ -293,6 +412,10 @@ function TransactionCreateForm({
                 localStorage.getItem("activeAccount") || ""
             );
 
+            if (type === "edit") {
+                data.append("_method", "PUT");
+            }
+
             await fetch(
                 type === "edit"
                     ? PATHS.API.PROXY.TRANSACTION.PUT(transaction?.id || "")
@@ -309,19 +432,22 @@ function TransactionCreateForm({
                     credentials: "include",
                     body: data,
                 }
-            ).then((res) => {
+            ).then(async (res) => {
                 if (res.status === 200) {
                     revalidate();
                     closeRef?.current?.click();
+                    const item = await res.json();
+                    setLoadingStates({ ...loadingStates, [item.id]: true });
+
                     if (type === "edit") {
                         if (changeActiveType) changeActiveType("view");
                     }
                     toast({
-                        description: MESSAGE.SUCCESS.CREATION("Transaction"),
+                        description: t.create,
                     });
                 }
                 if (res.status === 400) {
-                    setError(MESSAGE.ERROR.INSUFFICIENT_FUNDS);
+                    setError(t.insFunds);
                 }
             });
         }
@@ -372,13 +498,17 @@ function TransactionCreateForm({
                                         }
                                     />
                                 </span>
-                                <span>{type}</span>
+                                <span>
+                                    {type === "Expenses"
+                                        ? t.expenses
+                                        : t.income}
+                                </span>
                             </div>
                         ))}
                     </div>
                 </div>
                 <Input
-                    label="Title"
+                    label={t.title}
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
@@ -387,7 +517,7 @@ function TransactionCreateForm({
                 />
                 {categories && (
                     <MultiSelect
-                        label="Categories"
+                        label={t.categories}
                         categories={categories[formData.type]}
                         refetch={refetchCategories}
                         selected={formData.categories}
@@ -397,29 +527,25 @@ function TransactionCreateForm({
                     />
                 )}
                 <Input
-                    label="Amount"
+                    label={t.amount}
                     name="amount"
                     type="number"
                     value={formData.amount.toString()}
                     onChange={handleChange}
                     required={true}
                 />
-                <Input
-                    label="Payment Date"
-                    name="payment_date"
-                    type="date"
-                    value={formData.payment_date.toString()}
-                    onChange={handleChange}
-                    required={true}
+                <DatePicker
+                    onDateChange={handleDateChange}
+                    originalDate={formData.payment_date as Date}
                 />
                 <Input
-                    label="Payee"
+                    label={t.payee}
                     name="payee"
                     value={formData.payee}
                     onChange={handleChange}
                 />
                 <Input
-                    label="Description"
+                    label={t.description}
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
@@ -433,40 +559,18 @@ function TransactionCreateForm({
             <SheetFooter className="flex gap-4">
                 <Dialog>
                     <DialogTrigger asChild>
-                        <button>Cancel</button>
+                        <button>{t.camcel}</button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                            <div className="flex justify-between">
-                                <span>This transaction will not be saved</span>
-                                <div>
-                                    <Image
-                                        src="/icons/close.svg"
-                                        width={35}
-                                        height={35}
-                                        alt="close popup"
-                                    />
-                                </div>
-                            </div>
-                        </DialogHeader>
-                        <div className="flex items-center space-x-2">
-                            <p>Are you sure you want to cancel?</p>
-                        </div>
-                        <DialogFooter className="flex justify-end items-center">
-                            <DialogClose asChild>
-                                <span onClick={() => closeRef.current?.click()}>
-                                    Yes
-                                </span>
-                            </DialogClose>
-                            <DialogClose asChild>
-                                <Button text="No" onClick={() => {}} />
-                            </DialogClose>
-                        </DialogFooter>
-                    </DialogContent>
+                    <DialogBody
+                        header={t.cancelH}
+                        body={t.cancelM}
+                        onYes={() => closeRef.current?.click()}
+                    />
                 </Dialog>
                 <Button
                     onClick={handleSubmit}
-                    text="Save"
+                    onInactiveClick={handleInactive}
+                    text={t.save}
                     className="text-red px-5"
                     active={isFormValid()}
                 />

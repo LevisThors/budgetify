@@ -1,0 +1,138 @@
+{
+    "Auth": {
+        "invalid": "Please enter valid credentials",
+        "fillReq": "Please fill out the required fields"
+    },
+    "Transaction": {
+        "notFound": "Transactions not found",
+        "insFunds": "Insufficient funds",
+        "maxFiles": "You can only upload 5 files at once",
+        "fillReq": "Please fill out the required fields",
+        "create": "Transaction has been created successfully",
+        "update": "Transaction has been updated successfully",
+        "delete": "Transaction has been deleted successfully",
+        "deleteQ": "Are you sure you want to delete transaction?",
+        "cancelH": "Cancel transaction creation",
+        "cancelM": "Are you sure you want to cancel? Transaction will not be saved",
+        "add": "Add Transaction",
+        "header": "Transaction Information",
+        "download": "Download"
+    },
+    "Category": {
+        "invalidCharacter": "Please, enter the name that doesn't include any of these characters: «*~`!@#$%^&/><+_=|»",
+        "exists": "Category with such name already exists",
+        "notFound": "Categories not found",
+        "create": "Category has been created successfully",
+        "update": "Category has been updated successfully",
+        "delete": "Category has been deleted successfully",
+        "deleteQ": "Are you sure you want to delete Category?",
+        "cancel": "Are you sure you want to cancel? Category will not be saved",
+        "add": "Add Category",
+        "header": "Category Information"
+    },
+    "Obligatory": {
+        "title": "Hello world!",
+        "notFound": "Obligatories not found",
+        "insFunds": "Insufficient funds",
+        "fillReq": "Please fill out the required fields",
+        "invalidDate": "Payment date should be in the future",
+        "create": "Obligatory has been created successfully",
+        "update": "Obligatory has been updated successfully",
+        "delete": "Obligatory has been deleted successfully",
+        "deleteQ": "Are you sure you want to delete Obligatory?",
+        "cancelH": "Cancel obligatory creation",
+        "cancelM": "Are you sure you want to cancel? Obligatory will not be saved",
+        "add": "Add Obligatory",
+        "header": "Obligatory Information"
+    },
+    "Subscription": {
+        "title": "Hello world!",
+        "notFound": "Subscriptions not found",
+        "insFunds": "Insufficient funds",
+        "fillReq": "Please fill out the required fields",
+        "invalidDate": "Payment date should be in the future",
+        "create": "Subscription has been created successfully",
+        "update": "Subscription has been update successfully",
+        "delete": "Subscription has been delete successfully",
+        "deleteQ": "Are you sure you want to delete Subscription?",
+        "cancelH": "Cancel subscription creation",
+        "cancelM": "Are you sure you want to cancel? Subscription will not be saved",
+        "add": "Add Subscription",
+        "header": "Subscription Information"
+    },
+    "Account": {
+        "exists": "Account with such name already exists",
+        "create": "Account has been created successfully",
+        "update": "Account has been updated successfully",
+        "delete": "Account has been deleted successfully",
+        "deleteQ": "Are you sure you want to delete Account?",
+        "cancel": "Are you sure you want to cancel? Account will not be saved",
+        "add": "Add Account",
+        "header": "Account Information"
+    },
+    "PiggyBank": {
+        "insFunds": "Insufficient funds",
+        "create": "Piggy Bank has been created successfully",
+        "update": "Piggy Bank has been updated successfully",
+        "delete": "Piggy Bank has been deleted successfully",
+        "crash": "Crash",
+        "crashSucc": "Piggy Bank has been crashed",
+        "deleteQ": "Are you sure you want to delete PiggyBank?",
+        "cancel": "Are you sure you want to cancel? PiggyBank will not be saved",
+        "add": "Add Piggy Bank",
+        "header": "PiggyBank Information"
+    },
+    "Card": {
+        "nextDate": "Next payment date",
+        "dates": "Payment Dates",
+        "expenses": "Expenses",
+        "income": "Income"
+    },
+    "Filters": {
+        "expenses": "Expenses",
+        "income": "Income",
+        "transDate": "Transaction Date",
+        "search": "Search..."
+    },
+    "Statistics": {
+        "category": "Category Statistics",
+        "monthly": "Monthly Statistics",
+        "download": "Download Report",
+        "dateRange": "Date Range",
+        "total": "Total Expenses",
+        "selectedCategories": "Selected Categories",
+        "headers": {
+            "category": "Category",
+            "amount": "Amount",
+            "total": "% in total",
+            "month": "Month",
+            "income": "Income",
+            "expenses": "Expenses",
+            "economy": "Economy",
+            "economyPerc": "% of economy"
+        }
+    },
+    "Input": {
+        "title": "Title",
+        "categories": "Categories",
+        "amount": "Amount",
+        "paymentDate": "Payment Date",
+        "paymentDates": "Payment Dates",
+        "payee": "Payee",
+        "description": "Description",
+        "expenses": "Expenses",
+        "income": "Income",
+        "frequency": "Frequency",
+        "balance": "Balance",
+        "currency": "Currency",
+        "goal": "Goal",
+        "goalAmount": "Goal Amount",
+        "savedAmount": "Saved Amount",
+        "amountToSave": "Amount to Save",
+        "save": "Save",
+        "cancel": "cancel",
+        "close": "Close",
+        "monthly": "Monthly",
+        "required": "Required field is empty"
+    }
+}

@@ -39,7 +39,7 @@ export default function CategoryForm({
     ) => {
         const { name, value } = e.target;
 
-        if (!/^[a-zA-Z]*$/.test(value)) {
+        if (!/^[a-zA-Z ]*$/.test(value)) {
             setError(MESSAGE.ERROR.INVALID_CHARACTER);
             return;
         }

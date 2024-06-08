@@ -28,7 +28,7 @@ export default function MultiSelect({
     refetch,
     onSelect,
     selected,
-    type,
+    type = "Expenses",
 }: MultiSelectProps) {
     const [newData, setNewData] = useState<CategoryType[]>(categories);
     const [isSelectOpen, setIsSelectOpen] = useState<boolean>(false);
@@ -38,14 +38,23 @@ export default function MultiSelect({
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        setNewData(categories);
-    }, [categories]);
+        setNewData(
+            categories.filter(
+                (category) =>
+                    !selected?.some(
+                        (selectedCategory) =>
+                            selectedCategory.id === category.id
+                    )
+            )
+        );
+    }, [categories, selected]);
 
     const handleOpenInput = () => {
         setIsCategoryInput((prev) => !prev);
     };
 
-    const handleRemove = (id: string) => {
+    const handleRemove = (id: string, event: any) => {
+        event?.stopPropagation();
         setNewData((prev) => [
             ...prev,
             ...categories.filter((item) => item.id == id),
@@ -61,8 +70,8 @@ export default function MultiSelect({
     const handleChange = (e: any) => {
         const newValue = e.target.value;
 
-        if (!/^[a-zA-Z]*$/.test(newValue)) {
-            setError("Only letters are allowed");
+        if (!/^[a-zA-Z ]*$/.test(newValue)) {
+            setError(MESSAGE.ERROR.INVALID_CHARACTER);
             return;
         }
         setCategory(newValue);
@@ -90,6 +99,7 @@ export default function MultiSelect({
                 }),
             }).then((res) => {
                 if (res.status === 200) {
+                    setIsCategoryInput(false);
                     refetch();
                 }
                 if (res.status === 400) {
@@ -118,7 +128,8 @@ export default function MultiSelect({
                         touched && required && selected?.length === 0
                             ? "border-red-500"
                             : ""
-                    } relative border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2`}
+                    } relative border border-gray-400 h-[65px] flex items-center rounded-md overflow-hidden pb-2 cursor-pointer`}
+                    onClick={toggleMasonry}
                 >
                     <legend className="text-sm ms-2 px-1 text-gray-400">
                         {label}{" "}
@@ -129,7 +140,6 @@ export default function MultiSelect({
                     <span
                         className="absolute right-0 top-[50%] h-full bg-white z-10 flex items-center w-10 justify-center
                          cursor-pointer py-2 box-content -translate-y-[50%]"
-                        onClick={toggleMasonry}
                     >
                         <Image
                             src="/icons/chevron-down.svg"
@@ -178,7 +188,10 @@ export default function MultiSelect({
                                     />
                                 </div>
                             ) : (
-                                <button onClick={handleOpenInput}>
+                                <button
+                                    onClick={handleOpenInput}
+                                    className="bg-buttonTeal opacity-50 hover:opacity-100 rounded-lg py-2 transition-all"
+                                >
                                     Add Category
                                 </button>
                             )}

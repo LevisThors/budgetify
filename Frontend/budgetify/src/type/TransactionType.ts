@@ -6,13 +6,14 @@ export interface TransactionType {
     description: string;
     amount: string | number;
     type: "Income" | "Expenses";
-    payment_date: Date;
+    payment_date: Date | string;
     payee: string;
     categories: CategoryType[];
     media?: File[] | undefined;
     documents?: {
         path: string;
         name: string;
+        url: string;
     }[];
     [key: string]:
         | string
@@ -21,6 +22,6 @@ export interface TransactionType {
         | CategoryType[]
         | File[]
         | Date
-        | { path: string; name: string }[]
+        | { path: string; name: string; url: string }[]
         | undefined;
 }

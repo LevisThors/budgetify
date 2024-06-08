@@ -6,12 +6,30 @@ import { Progress } from "../ui/progress";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import PiggyBankForm from "../PiggyBankForm";
 import currencyToSymbol from "@/util/currencyToSymbol";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export default function PiggyBankButton({
     piggyBank,
 }: {
     piggyBank?: PiggyBankType;
 }) {
+    const [piggyBankMessages, setPiggyBankMessages] = useState<{
+        [key: string]: string;
+    }>({});
+    const params = useParams();
+
+    useEffect(() => {
+        const getMessage = async () => {
+            const messageData = await import(
+                `../../../messages/${params.locale}.json`
+            );
+            setPiggyBankMessages(messageData.PiggyBank);
+        };
+
+        getMessage();
+    }, [params.locale]);
+
     return (
         <div
             className={`${
@@ -36,8 +54,12 @@ export default function PiggyBankButton({
                                     {piggyBank.goal}
                                 </span>
                                 <span className="text-sm">
-                                    {piggyBank.saved_amount} /{" "}
-                                    {piggyBank.goal_amount}{" "}
+                                    {piggyBank.saved_amount >
+                                    piggyBank.goal_amount
+                                        ? piggyBank.saved_amount
+                                        : piggyBank.saved_amount +
+                                          " / " +
+                                          piggyBank.goal_amount}
                                     {currencyToSymbol(piggyBank.currency || "")}
                                 </span>
                             </div>
@@ -61,9 +83,12 @@ export default function PiggyBankButton({
                         <div className="w-full">
                             <Progress
                                 value={
-                                    (piggyBank.saved_amount /
-                                        piggyBank.goal_amount) *
-                                    100
+                                    piggyBank.saved_amount >
+                                    piggyBank.goal_amount
+                                        ? 100
+                                        : (piggyBank.saved_amount /
+                                              piggyBank.goal_amount) *
+                                          100
                                 }
                                 className="w-full h-2"
                             />
@@ -82,7 +107,7 @@ export default function PiggyBankButton({
                 <>
                     <div className="bg-buttonTeal text-authBlack py-1 rounded-lg flex items-center">
                         <span className="font-medium text-start">
-                            Add Piggy Bank
+                            {piggyBankMessages.add}
                         </span>
                     </div>
                     <Sheet>

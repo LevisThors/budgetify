@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class TransactionController extends Controller
 {
@@ -19,55 +20,58 @@ class TransactionController extends Controller
     public function getAll(Request $request)
     {
         if (is_numeric($request->account_id)) {
-            $query = $this->getModel()::where('account_id', $request['account_id'])
-                ->with('categories');
+            if (Auth::user()->accounts->where("id", $request->account_id)->first()) {
+                $query = $this->getModel()::where('account_id', $request['account_id'])
+                    ->with('categories');
 
-            if (isset($request->type)) {
-                $query->where('type', $request->type);
-            }
+                if (isset($request->type)) {
+                    $query->where('type', $request->type);
+                }
 
-            if (isset($request['query'])) {
-                $searchTerm = '%' . $request['query'] . '%';
-                $query->where('title', 'like', $searchTerm)
-                    ->orWhere('description', 'like', $searchTerm)
-                    ->orWhereHas('categories', function ($query) use ($searchTerm) {
-                        $query->where('title', 'like', $searchTerm);
-                    });;
-            }
+                if (isset($request['query'])) {
+                    $searchTerm = '%' . $request['query'] . '%';
+                    $query->where(function ($query) use ($searchTerm) {
+                        $query->where('title', 'like', $searchTerm)
+                            ->orWhere('description', 'like', $searchTerm)
+                            ->orWhereHas('categories', function ($query) use ($searchTerm) {
+                                $query->where('title', 'like', $searchTerm);
+                            });
+                    });
+                }
 
-            if (isset($request['sort'])) {
-                [$column, $direction] = explode('-', $request['sort']);
-                $query->orderBy($column, $direction);
-            } else {
-                $query->orderBy('payment_date', 'desc');
-            }
+                if (isset($request['sort'])) {
+                    [$column, $direction] = explode('-', $request['sort']);
+                    $query->orderBy($column, $direction);
+                } else {
+                    $query->orderBy('payment_date', 'desc');
+                }
 
-            // $transactions = $query->get();
+                $transactions = $query->get()->map(function ($transaction) {
+                    $transaction->documents = $transaction->getMedia()->map(function ($media) {
+                        return [
+                            'url' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
+                            'path' => $media->getPath(),
+                            'name' => $media->name,
+                        ];
+                    });
 
-            $transactions = $query->get()->map(function ($transaction) {
-                $transaction->documents = $transaction->getMedia()->map(function ($media) {
-                    return [
-                        'path' => env('NGROK_URL') . explode('localhost', $media->getUrl())[1],
-                        'name' => $media->name,
-                    ];
+                    return $transaction;
                 });
 
-                return $transaction;
-            });
+                if ($transactions->count() == 0) {
+                    return response()->json(['message' => 'Empty account'], 200);
+                }
 
-            if ($transactions->count() == 0) {
+                return response()->json(
+                    [
+                        'transactions' => $transactions,
+                        'currency' => Account::find($request->account_id)->first()->currency,
+                    ],
+                    200
+                );
+            } else {
                 return response()->json(['message' => 'Empty account'], 200);
             }
-
-            Log::info($transactions[0]->documents);
-
-            return response()->json(
-                [
-                    'transactions' => $transactions,
-                    'currency' => Account::find($request->account_id)->first()->currency,
-                ],
-                200
-            );
         } else {
             return response()->json(['message' => 'Empty account'], 200);
         }
@@ -84,23 +88,36 @@ class TransactionController extends Controller
                 return response()->json(['message' => 'Transaction not found'], 404);
             }
 
+            $account = Auth::user()->accounts->find($request->account_id);
+            $originalBalance = $transaction->type === "Expenses"
+                ? $account->balance + $transaction->amount
+                : $account->balance - $transaction->amount;
+
+            $account->balance = $request->type === 'Expenses'
+                ? $originalBalance - $request->amount
+                : $originalBalance + $request->amount;
+
+            if ($account->balance < 0) {
+                DB::rollBack();
+                return response()->json(['message' => 'Insufficient funds'], 400);
+            }
+
             $transaction->update([
                 'title' => $request['title'],
                 'description' => $request['description'],
                 'type' => $request['type'],
                 'amount' => $request['amount'],
                 'payment_date' => $request['payment_date'],
-                'payee' => $request['payee'] ? $request['payee']
-                    : Auth::user()->first_name . ' ' . Auth::user()->last_name,
-                'account_id' => $request->account_id,
+                'payee' => $request['payee'],
+                'account_id' => $request['account_id'],
             ]);
 
             if (isset($request['categories'])) {
-                $userCategories = Auth::user()->categories->pluck('id')->toArray();
+                $accountCategories = Auth::user()->accounts->find($request['account_id'])->categories->pluck('id')->toArray();
 
-                if (array_diff($request['categories'], $userCategories)) {
+                if (array_diff($request['categories'], $accountCategories)) {
                     DB::rollBack();
-                    return response()->json(['message' => 'Some categories do not belong to the user'], 400);
+                    return response()->json(['message' => 'Some categories do not belong to this account'], 400);
                 }
 
                 $transaction->categories()->sync($request['categories']);
@@ -108,20 +125,12 @@ class TransactionController extends Controller
 
             if (isset($request->media)) {
                 foreach ($request->media as $file) {
-                    $transaction
-                        ->addMedia($file)
-                        ->toMediaCollection();
+                    if (is_file($file)) {
+                        $transaction
+                            ->addMedia($file)
+                            ->toMediaCollection();
+                    }
                 }
-            }
-
-            $account = Auth::user()->accounts->find($request->account_id);
-            $account->balance = $request->type === 'Expenses'
-                ? $account->balance - $request->amount
-                : $account->balance + $request->amount;
-
-            if ($account->balance < 0) {
-                DB::rollBack();
-                return response()->json(['message' => 'Insufficient funds'], 400);
             }
 
             $account->save();
@@ -212,5 +221,14 @@ class TransactionController extends Controller
                 return response()->json(['message' => 'Error occurred while creating transaction: ' . $e->getMessage()], 500);
             }
         }
+    }
+
+    public function downloadDocument($path)
+    {
+        $path = str_replace('-s-', '/', $path);
+        // $path = explode('/storage', $path)[1];
+
+        Log::info($path);
+        return response()->download($path);
     }
 }

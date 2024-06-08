@@ -16,6 +16,16 @@ const PATHS = {
                     `/backend/api/transactions/${transactionId}`,
                 DELETE: (transactionId: string | number) =>
                     `/backend/api/transactions/${transactionId}`,
+                DOWNLOAD: (path: string) =>
+                    `/backend/api/transactions/download/${path}`,
+            },
+            SUBSCIRPTION: {
+                GET: "/backend/api/subscriptions",
+                POST: "/backend/api/subscriptions",
+                PUT: (subscriptionId: string | number) =>
+                    `/backend/api/subscriptions/${subscriptionId}`,
+                DELETE: (subscriptionId: string | number) =>
+                    `/backend/api/subscriptions/${subscriptionId}`,
             },
             CATEGORY: {
                 GET: "/backend/api/categories",
@@ -36,18 +46,30 @@ const PATHS = {
             PIGGY_BANK: {
                 GET: "/backend/api/piggy-banks",
                 POST: "/backend/api/piggy-banks",
-                PUT: (obligatoryId: string | number) =>
-                    `/backend/api/piggy-banks/${obligatoryId}`,
-                DELETE: (obligatoryId: string | number) =>
-                    `/backend/api/piggy-banks/${obligatoryId}`,
+                PUT: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}`,
+                DELETE: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}`,
+                CRASH: (piggyBankId: string | number) =>
+                    `/backend/api/piggy-banks/${piggyBankId}/crash`,
             },
             AUTH: {
                 GET_CSRF: "/backend/sanctum/csrf-cookie",
                 LOGIN: "/backend/api/login",
+                ADMIN: "/backend/api/admin",
                 REGISTER: "/backend/api/register",
                 LOGOUT: "/backend/api/logout",
                 FORGOT_PASSWORD: "/backend/api/auth/forgot-password",
                 RESET_PASSWORD: "/backend/api/auth/reset-password",
+            },
+            USER: {
+                GET: "/backend/api/user",
+            },
+            STATISTIC: {
+                DOWNLOAD_CATEGORY: (accountId: string) =>
+                    `/backend/api/categories/statistics?download=true&account_id=${accountId}`,
+                DOWNLOAD_MONTHLY: (accountId: string) =>
+                    `/backend/api/categories/monthly_statistics?download=true&account_id=${accountId}`,
             },
         },
         BASE: {
@@ -60,6 +82,9 @@ const PATHS = {
             TRANSACTION: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transactions`,
             },
+            SUBSCRIPTION: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/subscriptions`,
+            },
             CATEGORY: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories`,
             },
@@ -71,6 +96,9 @@ const PATHS = {
             },
             CATEGORY_STATISTICS: {
                 GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories/statistics`,
+            },
+            MONTHLY_STATISTICS: {
+                GET: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/categories/monthly_statistics`,
             },
         },
     },
